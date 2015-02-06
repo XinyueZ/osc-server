@@ -10,8 +10,14 @@ type UserInfo struct {
 }
 
 type User struct {
-	Uid  string `xml:"uid"`
 	Name string `xml:"name"`
+	Uid  int    `xml:"uid"`
+}
+
+type OnlineUser struct {
+	Uid     int
+	Name    string
+	Session string
 }
 
 type TweetList struct {
@@ -41,6 +47,6 @@ type ResultInfo struct {
 }
 
 type Result struct {
-	Code    int `xml:"errorCode"`
+	Code    int    `xml:"errorCode"`
 	Message string `xml:"errorMessage"`
 }
