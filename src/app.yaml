@@ -1,4 +1,4 @@
-application:  osc-server
+application:  osc-server-848
 version: 1
 runtime: go
 api_version: go1
