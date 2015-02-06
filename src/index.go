@@ -81,7 +81,7 @@ func handleTweetList(w http.ResponseWriter, r *http.Request) {
 
 	go printTweetList(cxt, 0, session, p, chTweetList)
 	tweets := <-chTweetList
-	showTweetList(w, r, tweets, 0, p)
+	showTweetList(w, r, tweets[:], 0, p)
 }
 
 func showTweetList(w http.ResponseWriter, r *http.Request, tweets []Tweet, uid int, page int) {
@@ -118,7 +118,7 @@ func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 
 	go printTweetList(cxt, i, session, p, chTweetList)
 	tweets := <-chTweetList
-	showTweetList(w, r, tweets, i, p)
+	showTweetList(w, r, tweets[:], i, p)
 }
 
 func handleTweetPub(w http.ResponseWriter, r *http.Request) {
