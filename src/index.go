@@ -2,7 +2,6 @@ package osc
 
 import (
 	"appengine"
-	"appengine/datastore"
 
 	"fmt"
 	"strings"
@@ -24,14 +23,17 @@ func init() {
 	http.HandleFunc("/tweetPub", handleTweetPub)
 }
 
+//Login a user and store oschina session-id to cookie.
+//Use the cookie to access rest APIs.
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chUser := make(chan *User)
 	chLogin := make(chan *http.Cookie)
 	defer func() {
-		if e := recover(); e != nil {
+		if err := recover(); err != nil {
 			close(chUser)
 			close(chLogin)
+			cxt.Errorf("handleLogin: %v", err)
 			fmt.Sprintf(`{"status":%d}`, STATUS_ERR)
 		}
 	}()
@@ -49,71 +51,61 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	s := fmt.Sprintf(`{"status":%d, "user":{"name":"%s", "uid":"%d", "expired":"%s"}}`, STATUS_OK, puser.Name, puser.Uid, expires.String())
 
-	q := datastore.NewQuery("OnlineUser").Filter("Uid =", puser.Uid)
-	clients := make([]OnlineUser, 0)
-	keys, _ := q.GetAll(cxt, &clients)
-	if len(clients) > 0 {
-		//Delete old one if find a existed item.
-		datastore.DeleteMulti(cxt, keys)
+	cookies := [...]*http.Cookie{
+		&http.Cookie{
+			Name:  "oscid",
+			Value: session,
+			Path:  "/",
+		},
 	}
-
-	ponlineUser := &OnlineUser{puser.Uid, puser.Name, session}
-	datastore.Put(cxt, datastore.NewIncompleteKey(cxt, "OnlineUser", nil), ponlineUser)
+	for _, cookie := range cookies {
+		http.SetCookie(w, cookie) //cookie to client
+	}
 	w.Header().Set("Content-Type", API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
 
-func handleTweetList(w http.ResponseWriter, r *http.Request) {
-	cxt := appengine.NewContext(r)
-	chTweetList := make(chan []Tweet)
-	defer func() {
-		if e := recover(); e != nil {
-			close(chTweetList)
-			fmt.Sprintf(`{"status":%d}`, STATUS_ERR)
-		}
-	}()
-	args := r.URL.Query()
-	uid := args[UID][0]   //Get user-id
-	page := args[PAGE][0] //Which page
-	i, _ := strconv.Atoi(uid)
-	session := getSession(cxt, i) //Get user-session
-	p, _ := strconv.Atoi(page)
+//--------------------------------------------------------------------------------
+//List of tweets, my tweets, all tweets(uid==0) etc.
+//--------------------------------------------------------------------------------
 
-	go printTweetList(cxt, 0, session, p, chTweetList)
-	tweets := <-chTweetList
-	showTweetList(w, r, tweets[:], 0, p)
-}
-
+//Show tweets in array(slice) by paging whit a uid.
+//When uid==0 then show all. Show also tweets of user self by his uid.
 func showTweetList(w http.ResponseWriter, r *http.Request, tweets []Tweet, uid int, page int) {
-		tweetsJson := ""
-		for _, tw := range tweets {
-			tw.Body = strings.Replace(tw.Body, `"`, "'", -1)
-			body := fmt.Sprintf(`{"id":%d, "pubDate":"%s", "body":"%s", "author":"%s", "authorid":%d, "imgSmall":"%s" , "commentCount":%d, "imgBig":"%s", "portrait":"%s"},`,
-				tw.Id, tw.PubDate, tw.Body, tw.Author, tw.AuthorId, tw.ImgSmall, tw.CommentCount, tw.ImgBig, tw.Portrait)
-			tweetsJson += body
-		}
-		tweetsJson = strings.Replace(tweetsJson, "<![CDATA[", "", -1)
-		tweetsJson = strings.Replace(tweetsJson, "]]>", "", -1)
-		tweetsJson = tweetsJson[:len(tweetsJson)-1] //Rmv last ","
-		s := fmt.Sprintf(`{"status":%d, "tweets":[%s]}`, STATUS_OK, tweetsJson)
-		w.Header().Set("Content-Type", API_RESTYPE)
-		fmt.Fprintf(w, s)
+	tweetsJson := ""
+	for _, tw := range tweets {
+		tw.Body = strings.Replace(tw.Body, `"`, "'", -1)
+		body := fmt.Sprintf(`{"id":%d, "pubDate":"%s", "body":"%s", "author":"%s", "authorid":%d, "imgSmall":"%s" , "commentCount":%d, "imgBig":"%s", "portrait":"%s"},`,
+			tw.Id, tw.PubDate, tw.Body, tw.Author, tw.AuthorId, tw.ImgSmall, tw.CommentCount, tw.ImgBig, tw.Portrait)
+		tweetsJson += body
+	}
+	tweetsJson = strings.Replace(tweetsJson, "<![CDATA[", "", -1)
+	tweetsJson = strings.Replace(tweetsJson, "]]>", "", -1)
+	tweetsJson = tweetsJson[:len(tweetsJson)-1] //Rmv last ","
+	s := fmt.Sprintf(`{"status":%d, "tweets":[%s]}`, STATUS_OK, tweetsJson)
+	w.Header().Set("Content-Type", API_RESTYPE)
+	fmt.Fprintf(w, s)
 }
 
+//Show user's tweets.
 func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chTweetList := make(chan []Tweet)
 	defer func() {
-		if e := recover(); e != nil {
+		if err := recover(); err != nil {
 			close(chTweetList)
+			cxt.Errorf("handleMyTweetList: %v", err)
 			fmt.Sprintf(`{"status":%d}`, STATUS_ERR)
 		}
 	}()
+
 	args := r.URL.Query()
-	uid := args[UID][0]   //Get user-id
-	page := args[PAGE][0] //Which page
+	uid := args[UID][0]         //Get user-id
+	page := args[PAGE][0]       //Which page
+	cookies := r.Cookies()      //Session in cookies passt
+	session := cookies[0].Value //Get user-session
+
 	i, _ := strconv.Atoi(uid)
-	session := getSession(cxt, i) //Get user-session
 	p, _ := strconv.Atoi(page)
 
 	go printTweetList(cxt, i, session, p, chTweetList)
@@ -121,21 +113,50 @@ func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	showTweetList(w, r, tweets[:], i, p)
 }
 
-func handleTweetPub(w http.ResponseWriter, r *http.Request) {
+//Show all tweets.
+func handleTweetList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
-	chTweetPub := make(chan Result)
+	chTweetList := make(chan []Tweet)
 	defer func() {
-		if e := recover(); e != nil {
-			close(chTweetPub)
+		if err := recover(); err != nil {
+			close(chTweetList)
+			cxt.Errorf("handleTweetList: %v", err)
 			fmt.Sprintf(`{"status":%d}`, STATUS_ERR)
 		}
 	}()
 
 	args := r.URL.Query()
-	uid := args[UID][0] //Get user-id
-	msg := args[MSG][0] //What to tweet
+	page := args[PAGE][0]       //Which page
+	cookies := r.Cookies()      //Session in cookies passt
+	session := cookies[0].Value //Get user-session
+
+	p, _ := strconv.Atoi(page)
+	go printTweetList(cxt, 0, session, p, chTweetList)
+	tweets := <-chTweetList
+	showTweetList(w, r, tweets[:], 0, p)
+}
+
+//--------------------------------------------------------------------------------
+
+//Publish a tweets.
+func handleTweetPub(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chTweetPub := make(chan Result)
+	defer func() {
+		if err := recover(); err != nil {
+			close(chTweetPub)
+			cxt.Errorf("handleTweetPub: %v", err)
+			fmt.Sprintf(`{"status":%d}`, STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	uid := args[UID][0]         //Get user-id
+	msg := args[MSG][0]         //What to tweet
+	cookies := r.Cookies()      //Session in cookies passt
+	session := cookies[0].Value //Get user-session
+
 	i, _ := strconv.Atoi(uid)
-	session := getSession(cxt, i) //Get user-session
 
 	go pubTweet(cxt, i, session, msg, chTweetPub)
 	pubRet := <-chTweetPub

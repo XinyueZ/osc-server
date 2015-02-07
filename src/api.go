@@ -2,7 +2,6 @@ package osc
 
 import (
 	"appengine"
-	"appengine/datastore"
 	"appengine/urlfetch"
 
 	"bytes"
@@ -27,14 +26,6 @@ func printHeader(r *http.Request, w http.ResponseWriter) {
 	for k, v := range header {
 		fmt.Fprintf(w, "k:%s v:%s", k, v)
 	}
-}
-
-func getSession(cxt appengine.Context, uid int) (s string) {
-	q := datastore.NewQuery("OnlineUser").Filter("Uid =", uid)
-	clients := make([]OnlineUser, 0)
-	q.GetAll(cxt, &clients)
-	s = clients[0].Session
-	return
 }
 
 func login(cxt appengine.Context, account string, password string, cookieCh chan *http.Cookie, userCh chan *User) {
@@ -77,13 +68,13 @@ func login(cxt appengine.Context, account string, password string, cookieCh chan
 	}
 }
 
-func printTweetList(cxt appengine.Context,  uid int, session string, page int, ch chan []Tweet) {
+func printTweetList(cxt appengine.Context, uid int, session string, page int, ch chan []Tweet) {
 	fmt.Println("Get Tweet-List.")
 	client := urlfetch.Client(cxt)
 	url := fmt.Sprintf(TWEET_LIST, uid, page)
 	fmt.Println(url)
 	body := fmt.Sprintf(TWEET_LIST_SCHEME, uid, page)
-	if r, e := http.NewRequest(POST, url,  bytes.NewBufferString(body)); e == nil {
+	if r, e := http.NewRequest(POST, url, bytes.NewBufferString(body)); e == nil {
 		makeHeader(r, "oscid="+session, 0)
 		if resp, e := client.Do(r); e == nil {
 			fmt.Println(resp.Status)

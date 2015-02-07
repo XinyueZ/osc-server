@@ -14,12 +14,6 @@ type User struct {
 	Uid  int    `xml:"uid"`
 }
 
-type OnlineUser struct {
-	Uid     int
-	Name    string
-	Session string
-}
-
 type TweetList struct {
 	XMLName     xml.Name    `xml:"oschina"`
 	TweetsArray TweetsArray `xml:"tweets"`
