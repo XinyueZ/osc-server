@@ -55,7 +55,6 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		&http.Cookie{
 			Name:  "oscid",
 			Value: session,
-			Path:  "/",
 		},
 	}
 	for _, cookie := range cookies {
@@ -79,8 +78,8 @@ func showTweetList(w http.ResponseWriter, r *http.Request, tweets []Tweet, uid i
 			tw.Id, tw.PubDate, tw.Body, tw.Author, tw.AuthorId, tw.ImgSmall, tw.CommentCount, tw.ImgBig, tw.Portrait)
 		tweetsJson += body
 	}
-	tweetsJson = strings.Replace(tweetsJson, "<![CDATA[", "", -1)
-	tweetsJson = strings.Replace(tweetsJson, "]]>", "", -1)
+	//tweetsJson = strings.Replace(tweetsJson, "<![CDATA[", "", -1)
+	//tweetsJson = strings.Replace(tweetsJson, "]]>", "", -1)
 	tweetsJson = tweetsJson[:len(tweetsJson)-1] //Rmv last ","
 	s := fmt.Sprintf(`{"status":%d, "tweets":[%s]}`, STATUS_OK, tweetsJson)
 	w.Header().Set("Content-Type", API_RESTYPE)
