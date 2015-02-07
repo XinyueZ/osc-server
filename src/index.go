@@ -49,7 +49,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	//Get user-info
 	puser := <-chUser
 
-	s := fmt.Sprintf(`{"status":%d, "user":{"name":"%s", "uid":"%d", "expired":"%s"}}`, STATUS_OK, puser.Name, puser.Uid, expires.String())
+	s := fmt.Sprintf(`{"status":%d, "user":{"name":"%s", "uid":%d, "expired":"%s"}}`, STATUS_OK, puser.Name, puser.Uid, expires.String())
 
 	cookies := [...]*http.Cookie{
 		&http.Cookie{
