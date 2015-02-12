@@ -28,8 +28,8 @@ func printHeader(r *http.Request, w http.ResponseWriter) {
 	}
 }
 
-func printTweetList(cxt appengine.Context, w http.ResponseWriter, uid int, session string, access_token string, page int, ch chan *TweetList) {
-	client := urlfetch.Client(cxt)  
+func printTweetList(cxt appengine.Context,  uid int, session string, access_token string, page int, ch chan *TweetList) {
+	client := urlfetch.Client(cxt)
 	body := fmt.Sprintf(TWEET_LIST_SCHEME, uid, access_token, page)
 	if r, e := http.NewRequest(POST, TWEET_LIST, bytes.NewBufferString(body)); e == nil {
 		makeHeader(r, "oscid="+session, 0)
@@ -42,20 +42,20 @@ func printTweetList(cxt appengine.Context, w http.ResponseWriter, uid int, sessi
 				if err := json.Unmarshal(bytes, pTweetList); err == nil {
 					ch <- pTweetList
 				} else {
-					fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+					panic(e)
 				}
 			} else {
-				fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+				panic(e)
 			}
 		} else {
-			fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+			panic(e)
 		}
 	} else {
-		fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+		panic(e)
 	}
 }
 
-func pubTweet(cxt appengine.Context, w http.ResponseWriter, uid int, session string, access_token string, msg string, ch chan *Result) {
+func pubTweet(cxt appengine.Context, uid int, session string, access_token string, msg string, ch chan *Result) {
 	client := urlfetch.Client(cxt)
 	body := fmt.Sprintf(TWEET_PUB_SCHEME, uid, access_token, msg)
 	if r, e := http.NewRequest(POST, TWEET_PUB, bytes.NewBufferString(body)); e == nil {
@@ -69,15 +69,15 @@ func pubTweet(cxt appengine.Context, w http.ResponseWriter, uid int, session str
 				if err := json.Unmarshal(bytes, pRes); err == nil {
 					ch <- pRes
 				} else {
-					fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+					panic(e)
 				}
 			} else {
-				fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+				panic(e)
 			}
 		} else {
-			fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+			panic(e)
 		}
 	} else {
-		fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
+		panic(e)
 	}
 }

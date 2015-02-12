@@ -35,7 +35,6 @@ const (
 	TOKEN_URL    = HOST + "token"
 	TOKEN_BODY   = "client_id=%s&client_secret=%s&grant_type=%s&redirect_uri=%s&code=%s&dataType=%s"
 	AUTH_REF_URL = ORIGINAL + "/action/oauth2/authorize?response_type=code&client_id=" + APP_ID + "&redirect_uri=" + REDIRECT_URL
-	REDIRECT_URL = "http://wanlingzhao.eu.pn/index.html"
 	SCOPE        = "tweet_api"
 	GRANT_TYPE   = "authorization_code"
 	RET_TYPE     = "json"

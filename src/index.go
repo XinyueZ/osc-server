@@ -103,7 +103,6 @@ func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	chTweetList := make(chan *TweetList)
 	defer func() {
 		if err := recover(); err != nil {
-			close(chTweetList)
 			cxt.Errorf("handleMyTweetList: %v", err)
 			fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 		}
@@ -119,7 +118,7 @@ func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	i, _ := strconv.Atoi(uid)
 	p, _ := strconv.Atoi(page)
 
-	go printTweetList(cxt, w, i, session, access_token, p, chTweetList)
+	go printTweetList(cxt,  i, session, access_token, p, chTweetList)
 	showTweetList(w, r, <-chTweetList, i, p)
 }
 
@@ -141,7 +140,7 @@ func handleTweetList(w http.ResponseWriter, r *http.Request) {
 	access_token := cookies[1].Value //Get user-token
 
 	p, _ := strconv.Atoi(page)
-	go printTweetList(cxt, w, 0, session, access_token, p, chTweetList)
+	go printTweetList(cxt,  0, session, access_token, p, chTweetList)
 	showTweetList(w, r, <-chTweetList, 0, p)
 }
 
@@ -152,8 +151,7 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chTweetPub := make(chan *Result)
 	defer func() {
-		if err := recover(); err != nil {
-			close(chTweetPub)
+		if err := recover(); err != nil { 
 			cxt.Errorf("handleTweetPub: %v", err)
 			fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 		}
@@ -168,7 +166,7 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 
 	i, _ := strconv.Atoi(uid)
 
-	go pubTweet(cxt, w, i, session, access_token, msg, chTweetPub)
+	go pubTweet(cxt, i, session, access_token, msg, chTweetPub)
 	pRes := <-chTweetPub
 	code, _ := strconv.Atoi(pRes.Code)
 	message := pRes.Message
