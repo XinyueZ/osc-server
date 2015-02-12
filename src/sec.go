@@ -7,7 +7,8 @@ package osc
 const (
 	APP_ID  = "APP_ID"
 	APP_SEC = "APP_SEC"
+	REDIRECT_URL = "http://www.oschina.net"
 )
 
-var KEY []byte = []byte{11, 45}
-var IV []byte = []byte{35, 23}
+var KEY []byte = []byte{}
+var IV []byte = []byte{}
