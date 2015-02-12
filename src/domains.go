@@ -1,46 +1,52 @@
 package osc
 
 import (
-	"encoding/xml"
+	"encoding/json"
 )
 
-type UserInfo struct {
-	XMLName xml.Name `xml:"oschina"`
-	User    User     `xml:"user"`
-}
-
-type User struct {
-	Name string `xml:"name"`
-	Uid  int    `xml:"uid"`
-}
-
-type TweetList struct {
-	XMLName     xml.Name    `xml:"oschina"`
-	TweetsArray TweetsArray `xml:"tweets"`
-}
-
-type TweetsArray struct {
-	Tweets []Tweet `xml:"tweet"`
-}
-
-type Tweet struct {
-	Id           int    `xml:"id"`
-	Portrait     string `xml:"portrait"`
-	Author       string `xml:"author"`
-	AuthorId     int    `xml:"authorid"`
-	Body         string `xml:"body"`
-	CommentCount int    `xml:"commentCount"`
-	PubDate      string `xml:"pubDate"`
-	ImgSmall     string `xml:"imgSmall"`
-	ImgBig       string `xml:"imgBig"`
-}
-
-type ResultInfo struct {
-	XMLName xml.Name `xml:"oschina"`
-	Result  Result   `xml:"result"`
+type Notice struct {
+	ReplyCount int `json:"replyCount"`
+	MsgCount   int `json:"msgCount"`
+	FansCount  int `json:"fansCount"`
+	ReferCount int `json:"referCount"`
 }
 
 type Result struct {
-	Code    int    `xml:"errorCode"`
-	Message string `xml:"errorMessage"`
+	Code    string `json:"error"`
+	Message string `json:"error_description"`
+}
+
+type TweetList struct {
+	Notice      Notice  `json:"notice"`
+	TweetsArray []Tweet `json:"tweetlist"`
+}
+
+func (self TweetList) StringTweetsArray() (s string) {
+	json, _ := json.Marshal(&self.TweetsArray)
+	s = string(json)
+	return
+}
+
+func (self TweetList) StringNotice() (s string) {
+	json, _ := json.Marshal(&self.Notice)
+	s = string(json)
+	return
+}
+
+type Tweet struct {
+	Id           int    `json:"id"`
+	Portrait     string `json:"portrait"`
+	Author       string `json:"author"`
+	AuthorId     int    `json:"authorid"`
+	Body         string `json:"body"`
+	CommentCount int    `json:"commentCount"`
+	PubDate      string `json:"pubDate"`
+	ImgSmall     string `json:"imgSmall"`
+	ImgBig       string `json:"imgBig"`
+}
+
+func (self Tweet) String() (s string) {
+	json, _ := json.Marshal(&self)
+	s = string(json)
+	return
 }

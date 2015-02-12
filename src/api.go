@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"encoding/xml"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -28,52 +28,11 @@ func printHeader(r *http.Request, w http.ResponseWriter) {
 	}
 }
 
-func login(cxt appengine.Context, account string, password string, cookieCh chan *http.Cookie, userCh chan *User) {
-	fmt.Println("Login.")
-	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(LOGIN_SCHEME, account, password)
-	url := LOGIN_VALIDATE_HTTP
-	fmt.Println(url)
-	if r, e := http.NewRequest(POST, url, bytes.NewBufferString(body)); e == nil {
-		makeHeader(r, "", len(body))
-		if resp, e := client.Do(r); e == nil {
-			fmt.Println(resp.Status)
-			var cookie *http.Cookie
-			if resp != nil {
-				defer resp.Body.Close()
-			}
-			if bytes, err := ioutil.ReadAll(resp.Body); err == nil {
-				var osc UserInfo
-				if err := xml.Unmarshal(bytes, &osc); err == nil {
-					for _, v := range resp.Cookies() {
-						if v.Value != "" {
-							cookie = v
-							break
-						}
-					}
-					cookieCh <- cookie
-					userCh <- &(osc.User)
-				} else {
-					panic(err)
-				}
-
-			} else {
-				panic(err)
-			}
-		} else {
-			panic(e)
-		}
-	} else {
-		panic(e)
-	}
-}
-
-func printTweetList(cxt appengine.Context, uid int, session string, page int, ch chan []Tweet) {
-	fmt.Println("Get Tweet-List.")
+func printTweetList(cxt appengine.Context, w http.ResponseWriter, uid int, session string, access_token string, page int, ch chan *TweetList) {
 	client := urlfetch.Client(cxt)
 	url := fmt.Sprintf(TWEET_LIST, uid, page)
 	fmt.Println(url)
-	body := fmt.Sprintf(TWEET_LIST_SCHEME, uid, page)
+	body := fmt.Sprintf(TWEET_LIST_SCHEME, uid, access_token, page)
 	if r, e := http.NewRequest(POST, url, bytes.NewBufferString(body)); e == nil {
 		makeHeader(r, "oscid="+session, 0)
 		if resp, e := client.Do(r); e == nil {
@@ -81,31 +40,29 @@ func printTweetList(cxt appengine.Context, uid int, session string, page int, ch
 			if resp != nil {
 				defer resp.Body.Close()
 			}
+			pTweetList := new(TweetList)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				var tweetList TweetList
-				if err := xml.Unmarshal(bytes, &tweetList); err == nil {
-					tweets := tweetList.TweetsArray.Tweets
-					ch <- tweets
+				if err := json.Unmarshal(bytes, pTweetList); err == nil {
+					ch <- pTweetList
 				} else {
-					panic(e)
+					fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 				}
 			} else {
-				panic(e)
+				fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 			}
 		} else {
-			panic(e)
+			fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 		}
 	} else {
-		panic(e)
+		fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 	}
 }
 
-func pubTweet(cxt appengine.Context, uid int, session string, msg string, ch chan Result) {
-	fmt.Println("Get Tweet-Pub.")
+func pubTweet(cxt appengine.Context, w http.ResponseWriter, uid int, session string, access_token string, msg string, ch chan *Result) {
 	client := urlfetch.Client(cxt)
 	url := TWEET_PUB
 	fmt.Println(url)
-	body := fmt.Sprintf(TWEET_PUB_SCHEME, uid, msg)
+	body := fmt.Sprintf(TWEET_PUB_SCHEME, uid, access_token, msg)
 	if r, e := http.NewRequest(POST, url, bytes.NewBufferString(body)); e == nil {
 		makeHeader(r, "oscid="+session, len(body))
 		if resp, e := client.Do(r); e == nil {
@@ -113,20 +70,20 @@ func pubTweet(cxt appengine.Context, uid int, session string, msg string, ch cha
 			if resp != nil {
 				defer resp.Body.Close()
 			}
+			pRes := new(Result)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				var ri ResultInfo
-				if err := xml.Unmarshal(bytes, &ri); err == nil {
-					ch <- ri.Result
+				if err := json.Unmarshal(bytes, pRes); err == nil {
+					ch <- pRes
 				} else {
-					panic(e)
+					fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 				}
 			} else {
-				panic(e)
+				fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 			}
 		} else {
-			panic(e)
+			fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 		}
 	} else {
-		panic(e)
+		fmt.Fprintf(w, `{"status":%d}`, STATUS_ERR)
 	}
 }
