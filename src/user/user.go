@@ -1,4 +1,4 @@
-package osc
+package user
 
 import (
 	"appengine"
@@ -14,6 +14,8 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+
+	"common"
 )
 
 type Token struct {
@@ -47,7 +49,7 @@ type OscUser struct {
 	AppSec   string
 }
 
-func newOscUser(account, password, appId, appSec string) (usr *OscUser) {
+func NewOscUser(account, password, appId, appSec string) (usr *OscUser) {
 	usr = new(OscUser)
 	usr.Account = account
 	usr.Password = password
@@ -62,11 +64,11 @@ func (self *OscUser) buildLoginBody() (body string) {
 }
 
 func (self *OscUser) buildOAuth2Body() (body string) {
-	body = fmt.Sprintf(`client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=""&user_oauth_approval=true&email=%s&pwd=%s`, self.AppId, REDIRECT_URL, SCOPE, self.Account, self.Password)
+	body = fmt.Sprintf(`client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=""&user_oauth_approval=true&email=%s&pwd=%s`, self.AppId, common.REDIRECT_URL, common.SCOPE, self.Account, self.Password)
 	return
 }
 
-func (self *OscUser) login(cxt appengine.Context, ch chan *Logined) {
+func (self *OscUser) Login(cxt appengine.Context, ch chan *Logined) {
 	defer func() {
 		if e := recover(); e != nil {
 			close(ch)
@@ -81,18 +83,18 @@ func (self *OscUser) login(cxt appengine.Context, ch chan *Logined) {
 	body := self.buildLoginBody()
 
 	pLogined := new(Logined)
-	if r, e := http.NewRequest("POST", "https://www.oschina.net/action/user/hash_login", bytes.NewBufferString(body)); e == nil {
+	if r, e := http.NewRequest("POST", common.LOGIN_URL, bytes.NewBufferString(body)); e == nil {
 
 		r.Header.Add("Accept", "*/*")
-		r.Header.Add("Accept-Encoding", ACCEPT_ENCODING)
-		r.Header.Add("Accept-Language", ACCEPT_LANG)
-		r.Header.Add("Connection", KEEP_ALIVE)
-		r.Header.Add("Content-Type", API_REQTYPE)
-		r.Header.Add("Host", OSC)
-		r.Header.Add("Origin", ORIGINAL)
-		r.Header.Add("User-Agent", AGENT)
-		r.Header.Add("X-Requested-With", XMLHTTPREQUEST)
-		r.Header.Add("Referer", AUTH_REF_URL)
+		r.Header.Add("Accept-Encoding", common.ACCEPT_ENCODING)
+		r.Header.Add("Accept-Language", common.ACCEPT_LANG)
+		r.Header.Add("Connection", common.KEEP_ALIVE)
+		r.Header.Add("Content-Type", common.API_REQTYPE)
+		r.Header.Add("Host", common.OSC)
+		r.Header.Add("Origin", common.ORIGINAL)
+		r.Header.Add("User-Agent", common.AGENT)
+		r.Header.Add("X-Requested-With", common.XMLHTTPREQUEST)
+		r.Header.Add("Referer", common.AUTH_REF_URL)
 
 		if resp, e := pClient.Do(r); e == nil {
 			//Get cookie, and do OAuth2 in order to fetching "code".
@@ -117,19 +119,19 @@ func (self *OscUser) login(cxt appengine.Context, ch chan *Logined) {
 func (self *OscUser) oAuth2(pClient *http.Client, cookie *http.Cookie) (code string) {
 	body := self.buildOAuth2Body()
 
-	if r, e := http.NewRequest("POST", AUTH_URL, bytes.NewBufferString(body)); e == nil {
+	if r, e := http.NewRequest("POST", common.AUTH_URL, bytes.NewBufferString(body)); e == nil {
 		r.Header.Add("Accept", "*/*")
-		r.Header.Add("Accept-Encoding", ACCEPT_ENCODING)
-		r.Header.Add("Accept-Language", ACCEPT_LANG)
-		r.Header.Add("Connection", KEEP_ALIVE)
-		r.Header.Add("Content-Type", API_REQTYPE)
-		r.Header.Add("Host", OSC)
-		r.Header.Add("X-Requested-With", XMLHTTPREQUEST)
-		r.Header.Add("User-Agent", AGENT)
-		r.Header.Add("Referer", AUTH_REF_URL)
-		r.Header.Add("Pragma", NO_CACHE)
-		r.Header.Add("Cache-Control", NO_CACHE)
-		r.Header.Add("Cache-Control", NO_CACHE)
+		r.Header.Add("Accept-Encoding", common.ACCEPT_ENCODING)
+		r.Header.Add("Accept-Language", common.ACCEPT_LANG)
+		r.Header.Add("Connection", common.KEEP_ALIVE)
+		r.Header.Add("Content-Type", common.API_REQTYPE)
+		r.Header.Add("Host", common.OSC)
+		r.Header.Add("X-Requested-With", common.XMLHTTPREQUEST)
+		r.Header.Add("User-Agent", common.AGENT)
+		r.Header.Add("Referer", common.AUTH_REF_URL)
+		r.Header.Add("Pragma", common.NO_CACHE)
+		r.Header.Add("Cache-Control", common.NO_CACHE)
+		r.Header.Add("Cache-Control", common.NO_CACHE)
 		r.Header.Add("Cookie", "oscid="+cookie.Value)
 
 		if resp, e := pClient.Do(r); e == nil {
@@ -145,9 +147,9 @@ func (self *OscUser) oAuth2(pClient *http.Client, cookie *http.Cookie) (code str
 }
 
 func (self *OscUser) getToken(pClient *http.Client, code string) (pToken *Token) {
-	body := fmt.Sprintf(TOKEN_BODY, APP_ID, APP_SEC, GRANT_TYPE, REDIRECT_URL, code, RET_TYPE)
-	if r, e := http.NewRequest("POST", TOKEN_URL, bytes.NewBufferString(body)); e == nil {
-		r.Header.Add("Content-Type", API_REQTYPE)
+	body := fmt.Sprintf(common.TOKEN_BODY, common.APP_ID, common.APP_SEC, common.GRANT_TYPE, common.REDIRECT_URL, code, common.RET_TYPE)
+	if r, e := http.NewRequest("POST", common.TOKEN_URL, bytes.NewBufferString(body)); e == nil {
+		r.Header.Add("Content-Type", common.API_REQTYPE)
 		if resp, e := pClient.Do(r); e == nil {
 			pToken = new(Token)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {

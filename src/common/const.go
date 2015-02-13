@@ -1,4 +1,4 @@
-package osc
+package common
 
 const (
 	OSC             = "www.oschina.net"
@@ -15,9 +15,9 @@ const (
 	XMLHTTPREQUEST  = "XMLHttpRequest"
 	AGENT           = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36"
 
-	TWEET_LIST        = HOST + "tweet_list"
+	TWEET_LIST_URL    = HOST + "tweet_list"
 	TWEET_LIST_SCHEME = "user=%d&access_token=%s&pageIndex=%d&pageSize=25"
-	TWEET_PUB         = HOST + "tweet_pub"
+	TWEET_PUB_URL     = HOST + "tweet_pub"
 	TWEET_PUB_SCHEME  = "user=%d&access_token=%s&msg=%s"
 
 	UID        = "uid"
