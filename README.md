@@ -89,6 +89,7 @@ oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert
 ##Tweet(tweet_list)##
 
 Get list of tweets.
+
 APIs:
 
 Var   | Method   |  Comment
@@ -163,6 +164,7 @@ Example:
 ##Tweet(friends_list)##
 
 A list of my friends(users on [oschina](http://www.oschina.net) ), including who focus on me and my fans.
+
 API: GET  /friendsList
 
 Request cookie:
