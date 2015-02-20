@@ -34,7 +34,7 @@ SAY NO to a hybrid-app.
 Update   |  API| Method
 --------|---------|---------
 02-20-2015             |  [/friendsList](#Friends-List(friends_list))|GET  
-02-13-2015|  [/login](#Login)|POST
+02-13-2015|  [/login](#login)|POST
   | /tweetList|GET 
   | /myTweetList|GET 
   | /hotspotTweetList |GET 
