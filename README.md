@@ -29,10 +29,16 @@ SAY NO to a hybrid-app.
 - You got an application-ID and an application-private-key after registration. 
 - Find [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) and input APP_ID for the application-ID, APP_SEC for the application-private-key.
 - Input KEY and IV in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) for login encryption. See below section for login.
+
+
+Update   |  API| Method
+--------|---------|---------
+02-20-2015             |  [/friendsList](#Friends-List(friends_list))|GET  
+02-13-2015|  /login|POST
+  | /tweetList|GET 
+  | /myTweetList|GET 
+  | /hotspotTweetList |GET 
  
-API update to date 02-13-2015
-
-
 ##Common##
 
 Var   |  Value
@@ -161,7 +167,7 @@ Example:
 }
 ```
 
-##Tweet(friends_list)##
+##Friends-List(friends_list)
 
 A list of my friends(users on [oschina](http://www.oschina.net) ), including who focus on me and my fans.
 
