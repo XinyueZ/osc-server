@@ -15,6 +15,7 @@ import (
 	"encoding/base64"
 
 	"common"
+	"personal"
 	"tweet"
 	"user"
 )
@@ -31,6 +32,7 @@ func init() {
 	http.HandleFunc("/myTweetList", handleMyTweetList)
 	http.HandleFunc("/hotspotTweetList", handleHotspotTweetList)
 	http.HandleFunc("/tweetPub", handleTweetPub)
+	http.HandleFunc("/friendsList", handleFriendsList)
 }
 
 func decodeBase64(s string) []byte {
@@ -97,7 +99,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 //Show user's tweets.
 func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
-	chTweetList := make(chan *tweet.TweetList)
+	chTweetList := make(chan *tweet.TweetsList)
 	defer func() {
 		if err := recover(); err != nil {
 			cxt.Errorf("handleMyTweetList: %v", err)
@@ -106,8 +108,8 @@ func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	args := r.URL.Query()
-	uid := args[common.UID][0]              //Get user-id
-	page := args[common.PAGE][0]            //Which page
+	uid := args[common.UID][0]       //Get user-id
+	page := args[common.PAGE][0]     //Which page
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
@@ -115,36 +117,14 @@ func handleMyTweetList(w http.ResponseWriter, r *http.Request) {
 	i, _ := strconv.Atoi(uid)
 	p, _ := strconv.Atoi(page)
 
-	go tweet.PrintTweetList(cxt, i, session, access_token, p, chTweetList)
+	go tweet.TweetList(cxt, i, session, access_token, p, chTweetList)
 	tweet.ShowTweetList(w, r, <-chTweetList, i, p)
 }
 
 //Show all tweets.
 func handleTweetList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
-	chTweetList := make(chan *tweet.TweetList)
-	defer func() {
-		if err := recover(); err != nil {
-			cxt.Errorf("handleTweetList: %v", err)
-			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
-		}
-	}()
-
-	args := r.URL.Query()
-	page := args[common.PAGE][0]            //Which page
-	cookies := r.Cookies()           //Session in cookies passt
-	session := cookies[0].Value      //Get user-session
-	access_token := cookies[1].Value //Get user-token
-
-	p, _ := strconv.Atoi(page)
-	go tweet.PrintTweetList(cxt, 0, session, access_token, p, chTweetList)
-	tweet.ShowTweetList(w, r, <-chTweetList, 0, p)
-}
-
-//Show hotspot tweets.
-func handleHotspotTweetList(w http.ResponseWriter, r *http.Request) {
-	cxt := appengine.NewContext(r)
-	chTweetList := make(chan *tweet.TweetList)
+	chTweetList := make(chan *tweet.TweetsList)
 	defer func() {
 		if err := recover(); err != nil {
 			cxt.Errorf("handleTweetList: %v", err)
@@ -159,7 +139,29 @@ func handleHotspotTweetList(w http.ResponseWriter, r *http.Request) {
 	access_token := cookies[1].Value //Get user-token
 
 	p, _ := strconv.Atoi(page)
-	go tweet.PrintTweetList(cxt, -1, session, access_token, p, chTweetList)
+	go tweet.TweetList(cxt, 0, session, access_token, p, chTweetList)
+	tweet.ShowTweetList(w, r, <-chTweetList, 0, p)
+}
+
+//Show hotspot tweets.
+func handleHotspotTweetList(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chTweetList := make(chan *tweet.TweetsList)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetList: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	page := args[common.PAGE][0]     //Which page
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	p, _ := strconv.Atoi(page)
+	go tweet.TweetList(cxt, -1, session, access_token, p, chTweetList)
 	tweet.ShowTweetList(w, r, <-chTweetList, 0, p)
 }
 
@@ -177,19 +179,44 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	args := r.URL.Query()
-	uid := args[common.UID][0]              //Get user-id
-	msg := args[common.MSG][0]              //What to tweet
+	uid := args[common.UID][0]       //Get user-id
+	msg := args[common.MSG][0]       //What to tweet
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
 	i, _ := strconv.Atoi(uid)
 
-	go tweet.PubTweet(cxt, i, session, access_token, msg, chTweetPub)
+	go tweet.TweetPub(cxt, i, session, access_token, msg, chTweetPub)
 	pRes := <-chTweetPub
 	code, _ := strconv.Atoi(pRes.Code)
 	message := pRes.Message
 	s := fmt.Sprintf(`{"status":%d, "result":{"code":%d, "msg":"%s"}}`, common.STATUS_OK, code, message)
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Get all friends
+func handleFriendsList(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chFansList := make(chan *personal.FriendsList)
+	chFocusList := make(chan *personal.FriendsList)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleFriendsList: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	go personal.FriendList(cxt, w, session, access_token, 0, chFansList)
+	go personal.FriendList(cxt, w, session, access_token, 1, chFocusList)
+	pFans := <-chFansList
+	pFocus := <-chFocusList
+	s := fmt.Sprintf(`{"status":%d, "friends":{"fans":%s, "focus" : %s}}`, common.STATUS_OK, pFans.StringFriendsArray(), pFocus.StringFriendsArray())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
