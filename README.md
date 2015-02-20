@@ -34,7 +34,7 @@ SAY NO to a hybrid-app.
 Update   |  API| Method
 --------|---------|---------
 02-20-2015             |  [/friendsList](#Friends-List(friends_list))|GET  
-02-13-2015|  /login|POST
+02-13-2015|  [/login](#Login)|POST
   | /tweetList|GET 
   | /myTweetList|GET 
   | /hotspotTweetList |GET 
@@ -46,7 +46,7 @@ Var   |  Value
 Host             |osc-server-848.appspot.com
  Request type|application/x-www-form-urlencoded; charset=UTF-8
  
-##Login: /login##
+##Login
 API: POST  /login
 
 Request body:
