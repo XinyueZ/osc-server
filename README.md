@@ -31,12 +31,13 @@ SAY NO to a hybrid-app.
 - Input KEY and IV in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) for login encryption. See below section for login.
  
 API update to date 02-13-2015
-- 
+
 
 ##Common##
-Var   |  Value      
---------|--------- 
-Host             |osc-server-848.appspot.com 
+
+Var   |  Value
+--------|---------
+Host             |osc-server-848.appspot.com
  Request type|application/x-www-form-urlencoded; charset=UTF-8
  
 ##Login: /login##
@@ -49,7 +50,7 @@ Var     | Type    | Comment
 u       |string   |login account
 pw      |string   |password
 
-Example:  
+Example:
 Body of plain-text in request
 ```java
 u=helloworld_account&pw=4567789 
@@ -80,14 +81,14 @@ Var   | Type       | Comment
 --------|---------|---------
 oscid              |string  |Session Id.
 access_token              |string  |Access-Token for current user.
-Example:  
+Example:
 ```
 oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert 
 ```
 
 ##Tweet(tweet_list)##
 
-
+Get list of tweets.
 APIs:
 
 Var   | Method   |  Comment
@@ -110,7 +111,7 @@ Var   | Type       | Comment
 oscid              |string  |Session Id after login.
 access_token              |string  |Access-Token for current user after login.
 
-Example:  
+Example:
 ```
 oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert 
 ```
@@ -158,6 +159,70 @@ Example:
   ]
 }
 ```
+
+##Tweet(friends_list)##
+
+A list of my friends(users on [oschina](http://www.oschina.net) ), including who focus on me and my fans.
+API: GET  /friendsList
+
+Request cookie:
+
+Var   | Type       | Comment
+--------|---------|---------
+oscid              |string  |Session Id after login.
+access_token              |string  |Access-Token for current user after login.
+
+Example:
+```
+oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert 
+```
+Return:
+
+Var      | Type     | Comment
+---------|---------|---------
+status   |int     |See section: Status code
+friends        |struct   |Struct of fans and focus
+fans        |struct   |Fans of me.
+focus        |struct   |Who have focused on me.
+expertise        |string   |User skills: Android developer, iOS developer etc.
+name        |string   |User name.
+userid        |int   |User id of [oschina](http://www.oschina.net) internal.
+gender        |int   |1:Male 2:Female
+portrait        |string   |Author photo thumbnail url.
+
+Example:
+```json
+{
+	"status": 200,
+	"friends": {
+		"fans": [{
+			"expertise": "asdfasfasdf",
+			"name": "ertwertwetwert",
+			"userid": 345,
+			"gender": 1,
+			"portrait": "http://static.oschina.net/uploads/user/428/wertwetwertwert.jpg?t=1388468572000"
+		}, {
+			"expertise": "dagfertwrtwetertwert",
+			"name": "wertwetwetwert",
+			"userid": 345345,
+			"gender": 2,
+			"portrait": "http://www.oschina.net/img/portrait.gif"
+		}, 
+		.........
+		],
+		"focus": [{
+			"expertise": "bsdfgfdgsdfg",
+			"name": "wertwetwetwetwetwert",
+			"userid": 356456,
+			"gender": 1,
+			"portrait": "http://www.oschina.net/img/portrait.gif"
+		},
+		.........
+		]
+	}
+}
+```
+
 
 ##Status code##
 
