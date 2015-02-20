@@ -39,7 +39,7 @@ Update   |  API| Method
   | [/myTweetList](#tweettweet_list)|GET 
   | [/hotspotTweetList](#tweettweet_list) |GET 
  
-##Common##
+##Common
 
 Var   |  Value
 --------|---------
@@ -92,7 +92,7 @@ Example:
 oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert 
 ```
 
-##Tweet(tweet_list)##
+##Tweet(tweet_list)
 
 Get list of tweets.
 
@@ -232,7 +232,7 @@ Example:
 ```
 
 
-##Status code##
+##Status code
 
 Var   |   Comment
 --------| ---------
