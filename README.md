@@ -33,11 +33,11 @@ SAY NO to a hybrid-app.
 
 Update   |  API| Method
 --------|---------|---------
-02-20-2015             |  [/friendsList](#Friends-List(friends_list))|GET  
+02-20-2015             |  [/friendsList](#friends-listfriends_list)|GET  
 02-13-2015|  [/login](#login)|POST
-  | /tweetList|GET 
-  | /myTweetList|GET 
-  | /hotspotTweetList |GET 
+  | /tweetList(#login)|GET 
+  | /myTweetList(#login)|GET 
+  | /hotspotTweetList(#login) |GET 
  
 ##Common##
 
