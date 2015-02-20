@@ -19,7 +19,7 @@ SAY NO to a hybrid-app.
 
 - Bypass the WebView or Browser of OAuth2.
 - More customized programming interfaces for client applications.
-- An in dev-progress [Java-Lib](https://github.com/XinyueZ/osc-tweet/tree/master/osctweet4j) of this encapsulation is available.
+- An in dev-progress [Java-Lib](https://github.com/XinyueZ/osc-tweet/tree/master/osc4j) of this encapsulation is available.
 - High speed feeling for oversee Chinese users.
 
 ##Host on  AppEngine
@@ -162,7 +162,7 @@ Example:
 		"imgSmall": "",
 		"imgBig": ""	
   },
-  ....
+  .................
   ]
 }
 ```
