@@ -23,7 +23,7 @@ const (
 	TWEET_PUB_SCHEME  = "user=%d&access_token=%s&msg=%s" + DATA_TYPE
 	
 	PERSONAL_FRIENDS_LIST_URL = HOST + "friends_list"
-	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=999&relation=%d&access_token=%s" + DATA_TYPE
+	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=99999&relation=%d&access_token=%s" + DATA_TYPE
 
 	UID        = "uid"
 	PAGE       = "page"
