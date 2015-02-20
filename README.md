@@ -35,9 +35,9 @@ Update   |  API| Method
 --------|---------|---------
 02-20-2015             |  [/friendsList](#friends-listfriends_list)|GET  
 02-13-2015|  [/login](#login)|POST
-  | /tweetList(#login)|GET 
-  | /myTweetList(#login)|GET 
-  | /hotspotTweetList(#login) |GET 
+  | /tweetList(#tweettweet_list)|GET 
+  | /myTweetList(#tweettweet_list)|GET 
+  | /hotspotTweetList(#tweettweet_list) |GET 
  
 ##Common##
 
