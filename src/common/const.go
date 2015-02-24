@@ -16,18 +16,27 @@ const (
 	AGENT           = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36"
 
 	DATA_TYPE = "&dataType=json"
-	
+
 	TWEET_LIST_URL    = HOST + "tweet_list"
 	TWEET_LIST_SCHEME = "user=%d&access_token=%s&pageIndex=%d&pageSize=25" + DATA_TYPE
 	TWEET_PUB_URL     = HOST + "tweet_pub"
 	TWEET_PUB_SCHEME  = "user=%d&access_token=%s&msg=%s" + DATA_TYPE
-	
-	PERSONAL_FRIENDS_LIST_URL = HOST + "friends_list"
+
+	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
 	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=99999&relation=%d&access_token=%s" + DATA_TYPE
 
+	USER_INFORMATION_URL    = HOST + "user_information"
+	USER_INFORMATION_SCHEME = "user=%d&friend=%d&access_token=%s" + DATA_TYPE
+	
+	FOCUS_USER_URL = HOST + "update_user_relation"
+	FOCUS_USER_SCHEME = "friend=%d&relation=%d&access_token=%s" + DATA_TYPE
+
 	UID        = "uid"
+	IDENT      = "ident"
 	PAGE       = "page"
-	MSG        = "msg" 
+	MSG        = "msg"
+	FRI        = "fri"
+	REL        = "rel"
 	STATUS_OK  = 200
 	STATUS_ERR = 300
 
@@ -40,7 +49,7 @@ const (
 	TOKEN_URL    = HOST + "token"
 	TOKEN_BODY   = "client_id=%s&client_secret=%s&grant_type=%s&redirect_uri=%s&code=%s&dataType=%s"
 	AUTH_REF_URL = ORIGINAL + "/action/oauth2/authorize?response_type=code&client_id=" + APP_ID + "&redirect_uri=" + REDIRECT_URL
-	SCOPE        = "tweet_api,user_api,"
+	SCOPE        = "tweet_api,user_api,user_mod_api,"
 	GRANT_TYPE   = "authorization_code"
 	RET_TYPE     = "json"
 )

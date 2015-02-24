@@ -33,6 +33,8 @@ func init() {
 	http.HandleFunc("/hotspotTweetList", handleHotspotTweetList)
 	http.HandleFunc("/tweetPub", handleTweetPub)
 	http.HandleFunc("/friendsList", handleFriendsList)
+	http.HandleFunc("/userInformation", handlePersonal)
+	http.HandleFunc("/updateRelation", handleUpdateRelation)
 }
 
 func decodeBase64(s string) []byte {
@@ -189,12 +191,15 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 
 	go tweet.TweetPub(cxt, i, session, access_token, msg, chTweetPub)
 	pRes := <-chTweetPub
-	code, _ := strconv.Atoi(pRes.Code)
-	message := pRes.Message
-	s := fmt.Sprintf(`{"status":%d, "result":{"code":%d, "msg":"%s"}}`, common.STATUS_OK, code, message)
+	//code, _ := strconv.Atoi(pRes.Code) 
+	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
+
+//--------------------------------------------------------------------------------
+//List of friends, fans and who are focused,
+//--------------------------------------------------------------------------------
 
 //Get all friends
 func handleFriendsList(w http.ResponseWriter, r *http.Request) {
@@ -212,11 +217,78 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
-	go personal.FriendList(cxt, w, session, access_token, 0, chFansList)
-	go personal.FriendList(cxt, w, session, access_token, 1, chFocusList)
+	//0-fans|1-who are focused.
+	go personal.FriendList(cxt, session, access_token, 0, chFansList)
+	go personal.FriendList(cxt, session, access_token, 1, chFocusList)
 	pFans := <-chFansList
 	pFocus := <-chFocusList
 	s := fmt.Sprintf(`{"status":%d, "friends":{"fans":%s, "focus" : %s}}`, common.STATUS_OK, pFans.StringFriendsArray(), pFocus.StringFriendsArray())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Get personal information.
+//When parameter "msg" is 1, then the first 50 tweets will be
+//sent to client.
+func handlePersonal(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chUserInfo := make(chan *personal.UserInfo)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handlePersonal: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+	args := r.URL.Query()
+	uid := args[common.UID][0] //Get my-id
+	fri := args[common.FRI][0] //An id of friend who will be checked.
+	msg := args[common.MSG][0] //When "msg" is 1, then the first 50 tweets
+
+	u, _ := strconv.Atoi(uid)
+	f, _ := strconv.Atoi(fri)
+	m, _ := strconv.Atoi(msg)
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	go personal.UserInformation(cxt, session, access_token, u, f, chUserInfo)
+	pUserInfo := <-chUserInfo
+
+	s := ""
+	if m != 1 { //When "msg" is 1, then the first 50 tweets
+		s = fmt.Sprintf(`{"status":%d, "user":%s}`, common.STATUS_OK, pUserInfo)
+	} else {
+		s = fmt.Sprintf(`{"status":%d, "user":%s}`, common.STATUS_OK, pUserInfo)
+	}
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Update relation between me and user.
+func handleUpdateRelation(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chRes := make(chan *common.Result)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleUpdateRelation: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+	args := r.URL.Query()
+	fri := args[common.FRI][0] //An id of friend who will be checked.
+	rel := args[common.REL][0] //Update relation between me and user:  0-cancle，1-focus
+
+	re, _ := strconv.Atoi(rel)
+	f, _ := strconv.Atoi(fri)
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	go personal.UpdateReleation(cxt,  session, access_token, f, re, chRes)
+	pRes := <-chRes
+	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }

@@ -1,5 +1,7 @@
 package common
 
+import "encoding/json"
+
 type Notice struct {
 	ReplyCount int `json:"replyCount"`
 	MsgCount   int `json:"msgCount"`
@@ -8,6 +10,12 @@ type Notice struct {
 }
 
 type Result struct {
-	Code    string `json:"error"`
-	Message string `json:"error_description"`
+	Code     string    `json:"error"`
+	Relation int    `json:"relation"` 
+}
+
+func (self *Result) String() (s string) {
+	json, _ := json.Marshal(&self)
+	s = string(json)
+	return
 }
