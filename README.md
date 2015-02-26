@@ -29,7 +29,7 @@ SAY NO to a hybrid-app.
 - You got an application-ID and an application-private-key after registration. 
 - Find [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) and input APP_ID for the application-ID, APP_SEC for the application-private-key.
 - Input KEY and IV in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) for login encryption. See below section for login.
-- The redirect you config in codes must be equal to what you register at oschina.
+- The redirect you config in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) must be same to what you register at oschina, even a "/" is sensitive.
 
 
 Update   |  API| Method
