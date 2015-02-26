@@ -34,7 +34,7 @@ SAY NO to a hybrid-app.
 Update   |  API| Method
 --------|---------|---------
 02-26-2015             |  [/userInformation](#user-informationuser_information)|GET  
-  | [/updateRelation](#tweettweet_list)|POST 
+  | [/updateRelation](#update-user-relationupdate_user_relation)|POST 
 02-20-2015             |  [/friendsList](#friends-listfriends_list)|GET  
 02-13-2015|  [/login](#login)|POST
   | [/tweetList](#tweettweet_list)|GET 
@@ -350,6 +350,8 @@ Example:
 ##Update user-relation(update_user_relation)
 
 Update relation between user and ME.
+
+API: POST  /updateRelation
 
 Request cookie:
 
