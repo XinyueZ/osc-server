@@ -41,6 +41,11 @@ Update   |  API| Method
   | [/tweetList](#tweettweet_list)|GET 
   | [/myTweetList](#tweettweet_list)|GET 
   | [/hotspotTweetList](#tweettweet_list) |GET 
+  
+  
+##Demo
+- [osc-auto-tweet](https://github.com/XinyueZ/osc-auto-tweet). Post a tweet on [www.oschina.net](http://www.oschina.net) automatically. Checkout the wrapper-lib, and run "git get" to fetch wrapper, change some imports, then go.
+- [osc-tweet](https://github.com/XinyueZ/osc-tweet/tree/master/osc-tweet). Use [Java-Lib: osc4j](https://github.com/XinyueZ/osc-tweet/tree/master/osc4j) as example of some APIs, it is still in dev-progress.
  
 ##Common
 
