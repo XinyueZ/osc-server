@@ -33,6 +33,8 @@ SAY NO to a hybrid-app.
 
 Update   |  API| Method
 --------|---------|---------
+02-26-2015             |  [/userInformation](#friends-listfriends_list)|GET  
+  | [/updateRelation](#tweettweet_list)|POST 
 02-20-2015             |  [/friendsList](#friends-listfriends_list)|GET  
 02-13-2015|  [/login](#login)|POST
   | [/tweetList](#tweettweet_list)|GET 
@@ -58,6 +60,7 @@ pw      |string   |password
 
 Example:
 Body of plain-text in request
+
 ```java
 u=helloworld_account&pw=4567789 
 ```
@@ -72,6 +75,7 @@ status   |int     |See section: Status code
 uid        |int   |An user id of [oschina](http://www.oschina.net) internal.
 expired   |int   |Time to expire current session in seconds.
 Example:
+
 ```json
 {
 	"status": 200,
@@ -231,6 +235,49 @@ Example:
 }
 ```
 
+##User-Information(user_information)
+
+Get personal information of a user.
+
+API: GET  /userInformation
+
+Request cookie:
+
+Var   | Type       | Comment
+--------|---------|---------
+oscid              |string  |Session Id after login.
+access_token              |string  |Access-Token for current user after login.
+
+Example:
+```
+oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert 
+```
+
+Request parameters:
+
+Var   | Type       |  Comment
+--------|---------|---------
+uid             |int  |My user-id of [oschina](http://www.oschina.net) internal.
+fri              |int  |An user-id of [oschina](http://www.oschina.net) internal, whose information will be checked.
+msg             |int  |1: Show last top tweets, might be 20 lines. non-1: no tweets.
+
+
+Return:
+
+Var      | Type     | Comment
+---------|---------|---------
+status   |int     |See section: Status code
+uid        |int   |User id of [oschina](http://www.oschina.net) internal.
+name        |string   |User-name.
+ident        |string   |User-nickname.
+province        |string   |From province
+city        |string   |From city.
+platforms        |string   |Favorite platforms to work.
+expertise        |string   |Skill.
+portrait        |string   |Author photo thumbnail url.
+gender        |int   |1:Male 2:Female
+relation        |int   |1- has been focuse 2-focused each other 3-no any relation.
+tweets |struct   |See [/tweetList](#tweettweet_list)
 
 ##Status code
 
