@@ -286,6 +286,13 @@ Return:
 Var      | Type     | Comment
 ---------|---------|---------
 status   |int     |See [Status code](#status-code)
+user |struct |User-info.
+tweets | array of struct   |See [/tweetList](#tweettweet_list)
+
+Struct of user-info.
+
+Var      | Type     | Comment
+---------|---------|---------
 uid        |int   |User id of [oschina](http://www.oschina.net) internal.
 name        |string   |User-name.
 ident        |string   |User-nickname.
@@ -296,8 +303,6 @@ expertise        |string   |Skill.
 portrait        |string   |Author photo thumbnail url.
 gender        |int   |1:Male 2:Female
 relation        |int   |1- has been focuse 2-focused each other 3-no any relation.
-tweets | array of struct   |See [/tweetList](#tweettweet_list)
-
 Example:
 
 ```json
