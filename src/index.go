@@ -228,7 +228,7 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 }
 
 //Get personal information.
-//When parameter "msg" is 1, then the first 50 tweets will be
+//When parameter "msg" is 1, then the first top tweets will be
 //sent to client.
 func handlePersonal(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
@@ -259,7 +259,11 @@ func handlePersonal(w http.ResponseWriter, r *http.Request) {
 	if m != 1 { //When "msg" is 1, then the first 50 tweets
 		s = fmt.Sprintf(`{"status":%d, "user":%s}`, common.STATUS_OK, pUserInfo)
 	} else {
-		s = fmt.Sprintf(`{"status":%d, "user":%s}`, common.STATUS_OK, pUserInfo)
+		chTweetList := make(chan *tweet.TweetsList)
+		go tweet.TweetList(cxt, f, session, access_token, 1, chTweetList)
+		pTweetsList := <-chTweetList
+		
+		s = fmt.Sprintf(`{"status":%d, "user":%s, "tweets" : %s}`, common.STATUS_OK, pUserInfo, pTweetsList.StringTweetsArray()) 
 	}
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
