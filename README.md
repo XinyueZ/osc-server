@@ -347,6 +347,56 @@ Example:
 }
 ```
 
+##Update user-relation(update_user_relation)
+
+Update relation between user and ME.
+
+Request cookie:
+
+Var   | Type       | Comment
+--------|---------|---------
+oscid              |string  |Session Id after login.
+access_token              |string  |Access-Token for current user after login.
+
+Example:
+```
+oscid=asdfasdfw5w456esgsdfg&pw=23434-456657dfg-ezt457-ert 
+```
+
+
+Request parameters:
+
+Var   | Type       |  Comment
+--------|---------|---------
+fri              |int  |An user-id of [oschina](http://www.oschina.net) internal, whose information will be checked.
+rel             |int  |0-cancel relation, 1-make relation(focuse on user).
+
+
+Return:
+
+Var      | Type     | Comment
+---------|---------|---------
+status   |int     |See [Status code](#status-code)
+result |struct |Update result
+
+Struct of result:
+
+Var      | Type     | Comment
+---------|---------|---------
+error   |int     |See [Status code](#status-code)
+relation |int |1- has been focuse 2-focused each other 3-no any relation.
+
+```json
+{
+	"status": 200,
+	"result": {
+		"error": "200",
+		"relation": 3
+	}
+}
+
+```
+
 ##Status code
 
 Var   |   Comment
