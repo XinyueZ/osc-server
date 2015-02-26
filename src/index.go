@@ -242,7 +242,7 @@ func handlePersonal(w http.ResponseWriter, r *http.Request) {
 	args := r.URL.Query()
 	uid := args[common.UID][0] //Get my-id
 	fri := args[common.FRI][0] //An id of friend who will be checked.
-	msg := args[common.MSG][0] //When "msg" is 1, then the first 50 tweets
+	msg := args[common.MSG][0] //When "msg" is 1, then the first top tweets
 
 	u, _ := strconv.Atoi(uid)
 	f, _ := strconv.Atoi(fri)
@@ -256,7 +256,7 @@ func handlePersonal(w http.ResponseWriter, r *http.Request) {
 	pUserInfo := <-chUserInfo
 
 	s := ""
-	if m != 1 { //When "msg" is 1, then the first 50 tweets
+	if m != 1 { //When "msg" is 1, then the first top tweets
 		s = fmt.Sprintf(`{"status":%d, "user":%s}`, common.STATUS_OK, pUserInfo)
 	} else {
 		chTweetList := make(chan *tweet.TweetsList)
