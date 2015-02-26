@@ -370,7 +370,7 @@ Request parameters:
 
 Var   | Type       |  Comment
 --------|---------|---------
-fri              |int  |An user-id of [oschina](http://www.oschina.net) internal, whose information will be checked.
+fri              |int  |An user-id. The relation this person will be operated.
 rel             |int  |0-cancel relation, 1-make relation(focuse on user).
 
 
