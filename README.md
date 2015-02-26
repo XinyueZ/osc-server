@@ -71,7 +71,7 @@ Return feeds:
 
 Var      | Type     | Comment
 ---------|---------|---------
-status   |int     |See section: Status code
+status   |int     |See [Status code](#status-code)
 uid        |int   |An user id of [oschina](http://www.oschina.net) internal.
 expired   |int   |Time to expire current session in seconds.
 Example:
@@ -130,7 +130,7 @@ Return:
 
 Var      | Type     | Comment
 ---------|---------|---------
-status   |int     |See section: Status code
+status   |int     |See [Status code](#status-code)
 id        |int   |Message Id.
 portrait        |string   |Author photo thumbnail url.
 author        |string   |Author name.
@@ -192,7 +192,7 @@ Return:
 
 Var      | Type     | Comment
 ---------|---------|---------
-status   |int     |See section: Status code
+status   |int     |See [Status code](#status-code)
 friends        |struct   |Struct of fans and focus
 fans        |struct   |Fans of me.
 focus        |struct   |Who have focused on me.
@@ -266,7 +266,7 @@ Return:
 
 Var      | Type     | Comment
 ---------|---------|---------
-status   |int     |See section: Status code
+status   |int     |See [Status code](#status-code)
 uid        |int   |User id of [oschina](http://www.oschina.net) internal.
 name        |string   |User-name.
 ident        |string   |User-nickname.
