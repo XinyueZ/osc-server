@@ -25,7 +25,7 @@ SAY NO to a hybrid-app.
 ##Host on  AppEngine
 
 - Checkout whole repository.
-- Register an application [here](http://www.oschina.net/openapi/client/edit). Don't worry about Chinese language, the Google's translator fills your willing.
+- Register an application [here](http://www.oschina.net/openapi/client/edit). Don't worry about Chinese language, the Google's translator fills your willing. Check all API permissions, the checkbox blow (because the wrapper do ALL).
 - You got an application-ID and an application-private-key after registration. 
 - Find [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) and input APP_ID for the application-ID, APP_SEC for the application-private-key.
 - Input KEY and IV in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) for login encryption. See below section for login.
