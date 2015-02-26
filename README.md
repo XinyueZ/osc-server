@@ -33,7 +33,7 @@ SAY NO to a hybrid-app.
 
 Update   |  API| Method
 --------|---------|---------
-02-26-2015             |  [/userInformation](#friends-listfriends_list)|GET  
+02-26-2015             |  [/userInformation](#user-informationuser_information)|GET  
   | [/updateRelation](#tweettweet_list)|POST 
 02-20-2015             |  [/friendsList](#friends-listfriends_list)|GET  
 02-13-2015|  [/login](#login)|POST
@@ -72,8 +72,15 @@ Return feeds:
 Var      | Type     | Comment
 ---------|---------|---------
 status   |int     |See [Status code](#status-code)
+user   |struct     |A user.
+
+Struct of a user.
+
+Var      | Type     | Comment
+---------|---------|---------
 uid        |int   |An user id of [oschina](http://www.oschina.net) internal.
 expired   |int   |Time to expire current session in seconds.
+
 Example:
 
 ```json
@@ -131,6 +138,12 @@ Return:
 Var      | Type     | Comment
 ---------|---------|---------
 status   |int     |See [Status code](#status-code)
+tweets   |array of struct     |All tweets.
+
+Struct of a tweet.
+
+Var      | Type     | Comment
+---------|---------|---------
 id        |int   |Message Id.
 portrait        |string   |Author photo thumbnail url.
 author        |string   |Author name.
@@ -194,8 +207,13 @@ Var      | Type     | Comment
 ---------|---------|---------
 status   |int     |See [Status code](#status-code)
 friends        |struct   |Struct of fans and focus
-fans        |struct   |Fans of me.
-focus        |struct   |Who have focused on me.
+fans        |array of struct   |Fans of me.
+focus        |array of struct   |Who have focused on me.
+
+Struct of friend:
+
+Var      | Type     | Comment
+---------|---------|---------
 expertise        |string   |User skills: Android developer, iOS developer etc.
 name        |string   |User name.
 userid        |int   |User id of [oschina](http://www.oschina.net) internal.
@@ -203,6 +221,7 @@ gender        |int   |1:Male 2:Female
 portrait        |string   |Author photo thumbnail url.
 
 Example:
+
 ```json
 {
 	"status": 200,
@@ -277,7 +296,51 @@ expertise        |string   |Skill.
 portrait        |string   |Author photo thumbnail url.
 gender        |int   |1:Male 2:Female
 relation        |int   |1- has been focuse 2-focused each other 3-no any relation.
-tweets |struct   |See [/tweetList](#tweettweet_list)
+tweets | array of struct   |See [/tweetList](#tweettweet_list)
+
+Example:
+
+```json
+{
+	"status": 200,
+	"user": {
+		"uid": 1170991,
+		"name": "simplehpt",
+		"ident": "simplehpt",
+		"province": "Âåó‰∫¨",
+		"city": "‰∏úÂüé",
+		"platforms": "Java EE Java SE Android HTML/CSS Linux/Unix ",
+		"expertise": "WEBÂºÄÂèë ÊúçÂä°Âô®Á´ØÂºÄÂèë ËΩØ‰ª∂ÂºÄÂèëÁÆ°ÁêÜ ",
+		"portrait": "http://static.oschina.net/uploads/user/585/1170991_50.jpg?t=1408671734000",
+		"gender": 1,
+		"relation": 3
+	},
+	"tweets": [{
+		"id": 4877440,
+		"portrait": "http://static.oschina.net/uploads/user/48/97321_50.jpg",
+		"author": "MusterMann",
+		"authorid": 97321,
+		"body": "asfasdfasdfasdfasdfsdfsdaf",
+		"commentCount": 0,
+		"pubDate": "2015-02-13 17:07:53",
+		"imgSmall": "",
+		"imgBig": ""
+	}, {
+		"id": 4877437,
+		"portrait": "http://static.oschina.net/uploads/user/51/102723_50.jpg?t=1411184780000",
+		"author": "zhuxinyu",
+		"authorid": 102723,
+		"body": "9dui bu qi, dong dan , ta de hao wo dao le9",
+		"commentCount": 0,
+		"pubDate": "2015-02-13 17:07:11",
+		"imgSmall": "",
+		"imgBig": ""	
+  },
+  .................
+  ]
+	
+}
+```
 
 ##Status code
 
