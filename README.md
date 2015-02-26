@@ -304,14 +304,14 @@ Example:
 {
 	"status": 200,
 	"user": {
-		"uid": 1170991,
-		"name": "simplehpt",
-		"ident": "simplehpt",
-		"province": "Âåó‰∫¨",
-		"city": "‰∏úÂüé",
+		"uid": 3455,
+		"name": "sdf",
+		"ident": "sdf",
+		"province": "Hongkou",
+		"city": "Shanghai",
 		"platforms": "Java EE Java SE Android HTML/CSS Linux/Unix ",
-		"expertise": "WEBÂºÄÂèë ÊúçÂä°Âô®Á´ØÂºÄÂèë ËΩØ‰ª∂ÂºÄÂèëÁÆ°ÁêÜ ",
-		"portrait": "http://static.oschina.net/uploads/user/585/1170991_50.jpg?t=1408671734000",
+		"expertise": "Java",
+		"portrait": "http://static.oschina.net/uploads/user/585/117033991_50.jpg?t=1408671734000",
 		"gender": 1,
 		"relation": 3
 	},
