@@ -147,7 +147,7 @@ func (self *OscUser) oAuth2(pClient *http.Client, cookie *http.Cookie) (code str
 }
 
 func (self *OscUser) getToken(pClient *http.Client, code string) (pToken *Token) {
-	body := fmt.Sprintf(common.TOKEN_BODY, common.APP_ID, common.APP_SEC, common.GRANT_TYPE, common.REDIRECT_URL, code, common.RET_TYPE)
+	body := fmt.Sprintf(common.TOKEN_BODY, self.AppId, self.AppSec, common.GRANT_TYPE, common.REDIRECT_URL, code, common.RET_TYPE)
 	if r, e := http.NewRequest("POST", common.TOKEN_URL, bytes.NewBufferString(body)); e == nil {
 		r.Header.Add("Content-Type", common.API_REQTYPE)
 		if resp, e := pClient.Do(r); e == nil {
