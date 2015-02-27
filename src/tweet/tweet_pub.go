@@ -14,9 +14,9 @@ import (
 	"net/http"
 )
 
-func TweetPub(cxt appengine.Context, uid int, session string, access_token string, msg string, ch chan *common.Result) {
+func TweetPub(cxt appengine.Context,  session string, access_token string, msg string, ch chan *common.Result) {
 	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(common.TWEET_PUB_SCHEME, uid, access_token, msg)
+	body := fmt.Sprintf(common.TWEET_PUB_SCHEME, access_token, msg)
 	if r, e := http.NewRequest(common.POST, common.TWEET_PUB_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, len(body))
 		if resp, e := client.Do(r); e == nil {

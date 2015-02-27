@@ -180,18 +180,16 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	args := r.URL.Query()
-	uid := args[common.UID][0]       //Get user-id
+	args := r.URL.Query() 
 	msg := args[common.MSG][0]       //What to tweet
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
+ 
 
-	i, _ := strconv.Atoi(uid)
-
-	go tweet.TweetPub(cxt, i, session, access_token, msg, chTweetPub)
+	go tweet.TweetPub(cxt, session, access_token, msg, chTweetPub)
 	pRes := <-chTweetPub
-	//code, _ := strconv.Atoi(pRes.Code) 
+ 
 	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)

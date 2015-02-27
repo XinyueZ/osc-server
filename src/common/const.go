@@ -20,7 +20,7 @@ const (
 	TWEET_LIST_URL    = HOST + "tweet_list"
 	TWEET_LIST_SCHEME = "user=%d&access_token=%s&pageIndex=%d&pageSize=25" + DATA_TYPE
 	TWEET_PUB_URL     = HOST + "tweet_pub"
-	TWEET_PUB_SCHEME  = "user=%d&access_token=%s&msg=%s" + DATA_TYPE
+	TWEET_PUB_SCHEME  = "access_token=%s&msg=%s" + DATA_TYPE
 
 	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
 	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=99999&relation=%d&access_token=%s" + DATA_TYPE
