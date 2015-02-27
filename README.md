@@ -25,10 +25,11 @@ SAY NO to a hybrid-app.
 ##Host on  AppEngine
 
 - Checkout whole repository.
-- Register an application [here](http://www.oschina.net/openapi/client/edit). Don't worry about Chinese language, the Google's translator fills your willing.
+- Register an application [here](http://www.oschina.net/openapi/client/edit). Don't worry about Chinese language, the Google's translator fills your willing. Check all API permissions, the checkbox blow (because the wrapper uses ALL of them).
 - You got an application-ID and an application-private-key after registration. 
 - Find [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) and input APP_ID for the application-ID, APP_SEC for the application-private-key.
 - Input KEY and IV in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) for login encryption. See below section for login.
+- The redirect you config in [sec.go](https://github.com/XinyueZ/osc-server/blob/master/src/common/sec.go) must be same to what you register at oschina, even a "/" is sensitive.
 
 
 Update   |  API| Method
@@ -40,6 +41,11 @@ Update   |  API| Method
   | [/tweetList](#tweettweet_list)|GET 
   | [/myTweetList](#tweettweet_list)|GET 
   | [/hotspotTweetList](#tweettweet_list) |GET 
+  
+  
+##Demo
+- [osc-auto-tweet](https://github.com/XinyueZ/osc-auto-tweet). Post a tweet on [www.oschina.net](http://www.oschina.net) automatically. Checkout the wrapper-lib, and run "git get" to fetch wrapper, change some imports, then go.
+- [osc-tweet](https://github.com/XinyueZ/osc-tweet/tree/master/osc-tweet). Use [Java-Lib: osc4j](https://github.com/XinyueZ/osc-tweet/tree/master/osc4j) as example of some APIs, it is still in dev-progress.
  
 ##Common
 
