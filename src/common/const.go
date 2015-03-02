@@ -30,6 +30,10 @@ const (
 	
 	FOCUS_USER_URL = HOST + "update_user_relation"
 	FOCUS_USER_SCHEME = "friend=%d&relation=%d&access_token=%s" + DATA_TYPE
+	
+	
+	MY_INFORMATION_URL    = HOST + "my_information"
+	MY_INFORMATION_SCHEME = "access_token=%s" + DATA_TYPE
 
 	UID        = "uid"
 	IDENT      = "ident"

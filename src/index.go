@@ -35,6 +35,7 @@ func init() {
 	http.HandleFunc("/friendsList", handleFriendsList)
 	http.HandleFunc("/userInformation", handlePersonal)
 	http.HandleFunc("/updateRelation", handleUpdateRelation)
+	http.HandleFunc("/myInformation", handleMyInformation)
 }
 
 func decodeBase64(s string) []byte {
@@ -291,6 +292,31 @@ func handleUpdateRelation(w http.ResponseWriter, r *http.Request) {
 	go personal.UpdateReleation(cxt,  session, access_token, f, re, chRes)
 	pRes := <-chRes
 	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+
+//Get my personal information.
+func handleMyInformation(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chMyInfo := make(chan *personal.MyInfo)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleMyInformation: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+ 
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	go personal.MyInformation(cxt, session, access_token, chMyInfo)
+	pMyInfo := <-chMyInfo
+
+	s := fmt.Sprintf(`{"status":%d, "am":%s}`, common.STATUS_OK, pMyInfo)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
