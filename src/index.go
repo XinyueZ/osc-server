@@ -18,6 +18,7 @@ import (
 	"personal"
 	"tweet"
 	"user"
+	"comment"
 )
 
 type Error string
@@ -36,6 +37,7 @@ func init() {
 	http.HandleFunc("/userInformation", handlePersonal)
 	http.HandleFunc("/updateRelation", handleUpdateRelation)
 	http.HandleFunc("/myInformation", handleMyInformation)
+	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
 }
 
 func decodeBase64(s string) []byte {
@@ -181,26 +183,49 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	args := r.URL.Query() 
-	msg := args[common.MSG][0]       //What to tweet
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
- 
+	msg := cookies[2].Value          //Message
 
 	go tweet.TweetPub(cxt, session, access_token, msg, chTweetPub)
 	pRes := <-chTweetPub
- 
+
 	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
 
-//--------------------------------------------------------------------------------
-//List of friends, fans and who are focused,
-//--------------------------------------------------------------------------------
+//Publish comment to tweet.
+func handleTweetCommentPub(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chResult := make(chan *common.Result)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetCommentPub: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
 
-//Get all friends
+	args := r.URL.Query()
+	id := args[common.ID][0] //Get my-id
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+	content := cookies[2].Value      //Comment- content
+
+	i, _ := strconv.Atoi(id)
+
+	go comment.TweetCommentPub(cxt, session, access_token, i, content, chResult)
+	pRes := <-chResult
+
+	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Get all friends.
 func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chFansList := make(chan *personal.FriendsList)
@@ -261,8 +286,8 @@ func handlePersonal(w http.ResponseWriter, r *http.Request) {
 		chTweetList := make(chan *tweet.TweetsList)
 		go tweet.TweetList(cxt, f, session, access_token, 1, chTweetList)
 		pTweetsList := <-chTweetList
-		
-		s = fmt.Sprintf(`{"status":%d, "user":%s, "tweets" : %s}`, common.STATUS_OK, pUserInfo, pTweetsList.StringTweetsArray()) 
+
+		s = fmt.Sprintf(`{"status":%d, "user":%s, "tweets" : %s}`, common.STATUS_OK, pUserInfo, pTweetsList.StringTweetsArray())
 	}
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
@@ -289,13 +314,12 @@ func handleUpdateRelation(w http.ResponseWriter, r *http.Request) {
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
-	go personal.UpdateReleation(cxt,  session, access_token, f, re, chRes)
+	go personal.UpdateReleation(cxt, session, access_token, f, re, chRes)
 	pRes := <-chRes
 	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
-
 
 //Get my personal information.
 func handleMyInformation(w http.ResponseWriter, r *http.Request) {
@@ -307,7 +331,6 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
 		}
 	}()
- 
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session

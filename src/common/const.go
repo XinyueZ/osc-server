@@ -30,11 +30,14 @@ const (
 	
 	FOCUS_USER_URL = HOST + "update_user_relation"
 	FOCUS_USER_SCHEME = "friend=%d&relation=%d&access_token=%s" + DATA_TYPE
-	
-	
+		
 	MY_INFORMATION_URL    = HOST + "my_information"
 	MY_INFORMATION_SCHEME = "access_token=%s" + DATA_TYPE
+	
+	COMMENT_PUB_URL   = HOST + "comment_pub"
+	COMMENT_PUB_SCHEME = "catalog=%d&id=%d&content=%s&access_token=%s" + DATA_TYPE
 
+	ID         = "id"
 	UID        = "uid"
 	IDENT      = "ident"
 	PAGE       = "page"
@@ -53,7 +56,7 @@ const (
 	TOKEN_URL    = HOST + "token"
 	TOKEN_BODY   = "client_id=%s&client_secret=%s&grant_type=%s&redirect_uri=%s&code=%s&dataType=%s"
 	AUTH_REF_URL = ORIGINAL + "/action/oauth2/authorize?response_type=code&client_id=" + APP_ID + "&redirect_uri=" + REDIRECT_URL
-	SCOPE        = "tweet_api,user_api,user_mod_api,"
+	SCOPE        = "tweet_api,user_api,user_mod_api,comment_api,"
 	GRANT_TYPE   = "authorization_code"
 	RET_TYPE     = "json"
 )
