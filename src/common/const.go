@@ -55,8 +55,7 @@ const (
 	AUTH_URL     = ORIGINAL + "/action/oauth2/authorize"
 	TOKEN_URL    = HOST + "token"
 	TOKEN_BODY   = "client_id=%s&client_secret=%s&grant_type=%s&redirect_uri=%s&code=%s&dataType=%s"
-	AUTH_REF_URL = ORIGINAL + "/action/oauth2/authorize?response_type=code&client_id=" + APP_ID + "&redirect_uri=" + REDIRECT_URL
-	SCOPE        = "tweet_api,user_api,user_mod_api,comment_api,"
+	AUTH_REF_URL = ORIGINAL + "/action/oauth2/authorize?response_type=code&client_id=%s&redirect_uri=%s"
 	GRANT_TYPE   = "authorization_code"
 	RET_TYPE     = "json"
 )

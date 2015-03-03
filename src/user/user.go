@@ -48,15 +48,17 @@ type OscUser struct {
 	AppId    string
 	AppSec   string
 	Redirect string
+	Scope    string
 }
 
-func NewOscUser(account, password, appId, appSec, redirectUrl string) (usr *OscUser) {
+func NewOscUser(account, password, appId, appSec, redirectUrl string, scope string) (usr *OscUser) {
 	usr = new(OscUser)
 	usr.Account = account
 	usr.Password = password
 	usr.AppId = appId
 	usr.AppSec = appSec
 	usr.Redirect = redirectUrl
+	usr.Scope = scope
 	return
 }
 
@@ -66,7 +68,7 @@ func (self *OscUser) buildLoginBody() (body string) {
 }
 
 func (self *OscUser) buildOAuth2Body() (body string) {
-	body = fmt.Sprintf(`client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=""&user_oauth_approval=true&email=%s&pwd=%s`, self.AppId, self.Redirect, common.SCOPE, self.Account, self.Password)
+	body = fmt.Sprintf(`client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=""&user_oauth_approval=true&email=%s&pwd=%s`, self.AppId, self.Redirect, self.Scope, self.Account, self.Password)
 	return
 }
 
@@ -96,7 +98,7 @@ func (self *OscUser) Login(cxt appengine.Context, ch chan *Logined) {
 		r.Header.Add("Origin", common.ORIGINAL)
 		r.Header.Add("User-Agent", common.AGENT)
 		r.Header.Add("X-Requested-With", common.XMLHTTPREQUEST)
-		r.Header.Add("Referer", common.AUTH_REF_URL)
+		r.Header.Add("Referer", fmt.Sprintf(common.AUTH_REF_URL, self.AppId, self.Redirect))
 
 		if resp, e := pClient.Do(r); e == nil {
 			//Get cookie, and do OAuth2 in order to fetching "code".
@@ -130,7 +132,7 @@ func (self *OscUser) oAuth2(pClient *http.Client, cookie *http.Cookie) (code str
 		r.Header.Add("Host", common.OSC)
 		r.Header.Add("X-Requested-With", common.XMLHTTPREQUEST)
 		r.Header.Add("User-Agent", common.AGENT)
-		r.Header.Add("Referer", common.AUTH_REF_URL)
+		r.Header.Add("Referer", fmt.Sprintf(common.AUTH_REF_URL, self.AppId, self.Redirect))
 		r.Header.Add("Pragma", common.NO_CACHE)
 		r.Header.Add("Cache-Control", common.NO_CACHE)
 		r.Header.Add("Cache-Control", common.NO_CACHE)
