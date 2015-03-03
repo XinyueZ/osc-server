@@ -47,14 +47,16 @@ type OscUser struct {
 	Password string
 	AppId    string
 	AppSec   string
+	Redirect string
 }
 
-func NewOscUser(account, password, appId, appSec string) (usr *OscUser) {
+func NewOscUser(account, password, appId, appSec, redirectUrl string) (usr *OscUser) {
 	usr = new(OscUser)
 	usr.Account = account
 	usr.Password = password
 	usr.AppId = appId
 	usr.AppSec = appSec
+	usr.Redirect = redirectUrl
 	return
 }
 
@@ -64,7 +66,7 @@ func (self *OscUser) buildLoginBody() (body string) {
 }
 
 func (self *OscUser) buildOAuth2Body() (body string) {
-	body = fmt.Sprintf(`client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=""&user_oauth_approval=true&email=%s&pwd=%s`, self.AppId, common.REDIRECT_URL, common.SCOPE, self.Account, self.Password)
+	body = fmt.Sprintf(`client_id=%s&response_type=code&redirect_uri=%s&scope=%s&state=""&user_oauth_approval=true&email=%s&pwd=%s`, self.AppId, self.Redirect, common.SCOPE, self.Account, self.Password)
 	return
 }
 
@@ -147,7 +149,7 @@ func (self *OscUser) oAuth2(pClient *http.Client, cookie *http.Cookie) (code str
 }
 
 func (self *OscUser) getToken(pClient *http.Client, code string) (pToken *Token) {
-	body := fmt.Sprintf(common.TOKEN_BODY, self.AppId, self.AppSec, common.GRANT_TYPE, common.REDIRECT_URL, code, common.RET_TYPE)
+	body := fmt.Sprintf(common.TOKEN_BODY, self.AppId, self.AppSec, common.GRANT_TYPE, self.Redirect, code, common.RET_TYPE)
 	if r, e := http.NewRequest("POST", common.TOKEN_URL, bytes.NewBufferString(body)); e == nil {
 		r.Header.Add("Content-Type", common.API_REQTYPE)
 		if resp, e := pClient.Do(r); e == nil {

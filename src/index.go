@@ -80,8 +80,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	data := strings.Split(plainText, "&")
 	account := strings.TrimSpace((strings.Split(data[0], "="))[1])
 	pwd := strings.TrimSpace((strings.Split(data[1], "="))[1])
-
-	pUser := user.NewOscUser(account, pwd, common.APP_ID, common.APP_SEC)
+	appId :=  strings.TrimSpace((strings.Split(data[2], "="))[1])
+	appSec := strings.TrimSpace((strings.Split(data[3], "="))[1])
+	redirectUrl := strings.TrimSpace((strings.Split(data[4], "="))[1])
+	
+	pUser := user.NewOscUser(account, pwd, appId, appSec, redirectUrl)
 	go pUser.Login(cxt, chLogin)
 
 	//Get cookie.
