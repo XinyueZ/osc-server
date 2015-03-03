@@ -37,6 +37,10 @@ const (
 	COMMENT_PUB_URL   = HOST + "comment_pub"
 	COMMENT_PUB_SCHEME = "catalog=%d&id=%d&content=%s&access_token=%s" + DATA_TYPE
 
+	COMMENT_LIST_URL   = HOST + "comment_list"
+	COMMENT_LIST_SCHEME = "catalog=%d&id=%d&page=1&pageSize=99999&access_token=%s" + DATA_TYPE
+	
+	
 	ID         = "id"
 	UID        = "uid"
 	IDENT      = "ident"

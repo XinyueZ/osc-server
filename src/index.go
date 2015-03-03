@@ -14,11 +14,11 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 
+	"comment"
 	"common"
 	"personal"
 	"tweet"
 	"user"
-	"comment"
 )
 
 type Error string
@@ -38,6 +38,7 @@ func init() {
 	http.HandleFunc("/updateRelation", handleUpdateRelation)
 	http.HandleFunc("/myInformation", handleMyInformation)
 	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
+	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
 }
 
 func decodeBase64(s string) []byte {
@@ -80,11 +81,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	data := strings.Split(plainText, "&")
 	account := strings.TrimSpace((strings.Split(data[0], "="))[1])
 	pwd := strings.TrimSpace((strings.Split(data[1], "="))[1])
-	appId :=  strings.TrimSpace((strings.Split(data[2], "="))[1])
+	appId := strings.TrimSpace((strings.Split(data[2], "="))[1])
 	appSec := strings.TrimSpace((strings.Split(data[3], "="))[1])
 	redirectUrl := strings.TrimSpace((strings.Split(data[4], "="))[1])
 	scope := strings.TrimSpace((strings.Split(data[5], "="))[1])
-	
+
 	pUser := user.NewOscUser(account, pwd, appId, appSec, redirectUrl, scope)
 	go pUser.Login(cxt, chLogin)
 
@@ -344,6 +345,33 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	pMyInfo := <-chMyInfo
 
 	s := fmt.Sprintf(`{"status":%d, "am":%s}`, common.STATUS_OK, pMyInfo)
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Get all comments of a tweet.
+func handleTweetCommentList(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chCommentList := make(chan *comment.CommentList)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetCommentList: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	id := args[common.ID][0] //Which tweet item
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	i, _ := strconv.Atoi(id)
+
+	go comment.TweetCommentList(cxt, session, access_token, i, chCommentList)
+	pCommentList := <-chCommentList
+	s := fmt.Sprintf(`{"status":%d, "comments":%s}`, common.STATUS_OK, pCommentList.StringCommentArray())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
