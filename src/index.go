@@ -362,14 +362,16 @@ func handleTweetCommentList(w http.ResponseWriter, r *http.Request) {
 
 	args := r.URL.Query()
 	id := args[common.ID][0] //Which tweet item
+	page := args[common.PAGE][0]     //Which page
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
 	i, _ := strconv.Atoi(id)
+	pg, _ := strconv.Atoi(page)
 
-	go comment.TweetCommentList(cxt, session, access_token, i, chCommentList)
+	go comment.TweetCommentList(cxt, session, access_token, i, pg, chCommentList)
 	pCommentList := <-chCommentList
 	s := fmt.Sprintf(`{"status":%d, "comments":%s}`, common.STATUS_OK, pCommentList.StringCommentArray())
 	w.Header().Set("Content-Type", common.API_RESTYPE)

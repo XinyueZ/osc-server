@@ -13,13 +13,13 @@ import (
 	"common"
 )
 
-func TweetCommentList(cxt appengine.Context, session string, access_token string, id int, ch chan *CommentList) {
-	Comments(cxt, session, access_token, id, 3, ch)
+func TweetCommentList(cxt appengine.Context, session string, access_token string, id int, page int, ch chan *CommentList) {
+	Comments(cxt, session, access_token, id, 3, page, ch)
 }
 
-func Comments(cxt appengine.Context, session string, access_token string, id int, catalog int, ch chan *CommentList) {
+func Comments(cxt appengine.Context, session string, access_token string, id int, catalog int, page int, ch chan *CommentList) {
 	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(common.COMMENT_LIST_SCHEME, catalog, id, access_token)
+	body := fmt.Sprintf(common.COMMENT_LIST_SCHEME, catalog, id, page, access_token)
 	//fmt.Fprintf(w, `%s\n`, body)
 	if r, e := http.NewRequest(common.POST, common.COMMENT_LIST_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, 0)
