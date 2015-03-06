@@ -39,7 +39,7 @@ func init() {
 	http.HandleFunc("/myInformation", handleMyInformation)
 	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
 	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
-	http.HandleFunc("/lastTweetActiveList", handleLastTweetActiveList)
+	http.HandleFunc("/tweetActiveList", handleTweetActiveList)
 }
 
 func decodeBase64(s string) []byte {
@@ -351,7 +351,7 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	sActivesList := "null"
 	if pActivesList != nil {
 		sActivesList = pActivesList.StringActivesArray()
-	} 
+	}
 	s := fmt.Sprintf(`{"status":%d, "am":%s, "actives" : %s}`, common.STATUS_OK, pMyInfo, sActivesList)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
@@ -386,8 +386,8 @@ func handleTweetCommentList(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, s)
 }
 
-//Show last tweet actives.
-func handleLastTweetActiveList(w http.ResponseWriter, r *http.Request) {
+//Show  tweet actives.
+func handleTweetActiveList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chActivesList := make(chan *personal.ActivesList)
 	defer func() {
@@ -407,8 +407,9 @@ func handleLastTweetActiveList(w http.ResponseWriter, r *http.Request) {
 
 	user, _ := strconv.Atoi(uid)
 	pg, _ := strconv.Atoi(page)
-	pActivesList := personal.LastTweetActiveList(cxt, session, access_token, user, pg, chActivesList)
-
+	go personal.TweetActiveList(cxt, session, access_token, user, pg, chActivesList)
+	pActivesList := <-chActivesList
+	
 	s := "null"
 	if pActivesList != nil {
 		s = pActivesList.StringActivesArray()

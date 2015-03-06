@@ -16,7 +16,7 @@ import (
 
 
 func LastTweetActiveList(cxt appengine.Context, session string, access_token string, user int, page int, ch chan *ActivesList) (pActivesList *ActivesList) {
-	go TweetActiveList(cxt, session, access_token, user, 3, page, ch)
+	go TweetActiveList(cxt, session, access_token, user, page, ch)
 	pActivesList = <-ch 
 	atMoment := pActivesList.Notice.ReferCount
 	if atMoment > 0 { //Only last new referes will be shown on client.
@@ -28,8 +28,8 @@ func LastTweetActiveList(cxt appengine.Context, session string, access_token str
 } 
 
 
-func TweetActiveList(cxt appengine.Context, session string, access_token string, user int,  catalog int, page int, ch chan *ActivesList) {
-	Actives(cxt, session, access_token, user, 3, page, ch)
+func TweetActiveList(cxt appengine.Context, session string, access_token string, user int,   page int, ch chan *ActivesList) {
+	Actives(cxt, session, access_token, user, 2, page, ch)
 }
 
 func Actives(cxt appengine.Context, session string, access_token string, user int, catalog int, page int, ch chan *ActivesList) {
