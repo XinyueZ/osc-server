@@ -39,6 +39,7 @@ func init() {
 	http.HandleFunc("/myInformation", handleMyInformation)
 	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
 	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
+	http.HandleFunc("/lastTweetActiveList", handleLastTweetActiveList)
 }
 
 func decodeBase64(s string) []byte {
@@ -330,6 +331,7 @@ func handleUpdateRelation(w http.ResponseWriter, r *http.Request) {
 func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chMyInfo := make(chan *personal.MyInfo)
+	chActivesList := make(chan *personal.ActivesList)
 	defer func() {
 		if err := recover(); err != nil {
 			cxt.Errorf("handleMyInformation: %v", err)
@@ -344,7 +346,13 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	go personal.MyInformation(cxt, session, access_token, chMyInfo)
 	pMyInfo := <-chMyInfo
 
-	s := fmt.Sprintf(`{"status":%d, "am":%s}`, common.STATUS_OK, pMyInfo)
+	//Get first page of active-list of replies of tweets that I joined.
+	pActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, chActivesList)
+	sActivesList := "null"
+	if pActivesList != nil {
+		sActivesList = pActivesList.StringActivesArray()
+	} 
+	s := fmt.Sprintf(`{"status":%d, "am":%s, "actives" : %s}`, common.STATUS_OK, pMyInfo, sActivesList)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
@@ -361,8 +369,8 @@ func handleTweetCommentList(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	args := r.URL.Query()
-	id := args[common.ID][0] //Which tweet item
-	page := args[common.PAGE][0]     //Which page
+	id := args[common.ID][0]     //Which tweet item
+	page := args[common.PAGE][0] //Which page
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
@@ -374,6 +382,38 @@ func handleTweetCommentList(w http.ResponseWriter, r *http.Request) {
 	go comment.TweetCommentList(cxt, session, access_token, i, pg, chCommentList)
 	pCommentList := <-chCommentList
 	s := fmt.Sprintf(`{"status":%d, "comments":%s}`, common.STATUS_OK, pCommentList.StringCommentArray())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Show last tweet actives.
+func handleLastTweetActiveList(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chActivesList := make(chan *personal.ActivesList)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleLastTweetActiveList: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	uid := args[common.UID][0]   //User id
+	page := args[common.PAGE][0] //Which page
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	user, _ := strconv.Atoi(uid)
+	pg, _ := strconv.Atoi(page)
+	pActivesList := personal.LastTweetActiveList(cxt, session, access_token, user, pg, chActivesList)
+
+	s := "null"
+	if pActivesList != nil {
+		s = pActivesList.StringActivesArray()
+	}
+	fmt.Sprintf(`{"status":%d, "actives":%s}`, common.STATUS_OK, s)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }

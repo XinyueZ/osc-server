@@ -40,6 +40,10 @@ const (
 	COMMENT_LIST_URL   = HOST + "comment_list"
 	COMMENT_LIST_SCHEME = "catalog=%d&id=%d&page=%d&pageSize=30&access_token=%s" + DATA_TYPE
 	
+	ACTIVE_LIST_URL   = HOST + "active_list"
+	ACTIVE_LIST_SCHEME = "catalog=%d&user=%d&page=%d&pageSize=30&access_token=%s" + DATA_TYPE
+	
+	
 	
 	ID         = "id"
 	UID        = "uid"
