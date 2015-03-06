@@ -40,6 +40,7 @@ func init() {
 	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
 	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
 	http.HandleFunc("/tweetActiveList", handleTweetActiveList)
+	http.HandleFunc("/commentActiveList", handleCommentActiveList)
 }
 
 func decodeBase64(s string) []byte {
@@ -331,7 +332,8 @@ func handleUpdateRelation(w http.ResponseWriter, r *http.Request) {
 func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chMyInfo := make(chan *personal.MyInfo)
-	chActivesList := make(chan *personal.ActivesList)
+	chTweetActivesList := make(chan *personal.ActivesList)
+	chCommentActivesList := make(chan *personal.ActivesList)
 	defer func() {
 		if err := recover(); err != nil {
 			cxt.Errorf("handleMyInformation: %v", err)
@@ -346,13 +348,19 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	go personal.MyInformation(cxt, session, access_token, chMyInfo)
 	pMyInfo := <-chMyInfo
 
-	//Get first page of active-list of replies of tweets that I joined.
-	pActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, chActivesList)
-	sActivesList := "null"
-	if pActivesList != nil {
-		sActivesList = pActivesList.StringActivesArray()
+	//Get first page of active-list of at you of tweets that I joined.
+	pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, chTweetActivesList)
+	sTweetActivesList := "null"
+	if pTweetActivesList != nil {
+		sTweetActivesList = pTweetActivesList.StringActivesArray()
 	}
-	s := fmt.Sprintf(`{"status":%d, "am":%s, "actives" : %s}`, common.STATUS_OK, pMyInfo, sActivesList)
+	//Get first page of active-list of comments of tweets that I've written.
+	pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid, 1, chCommentActivesList)
+	sCommentActivesList := "null"
+	if pCommentActivesList != nil {
+		sCommentActivesList = pCommentActivesList.StringActivesArray()
+	}
+	s := fmt.Sprintf(`{"status":%d, "am":%s, "actives" : %s,  "comments":%s}`, common.STATUS_OK, pMyInfo, sTweetActivesList, sCommentActivesList)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
@@ -392,7 +400,7 @@ func handleTweetActiveList(w http.ResponseWriter, r *http.Request) {
 	chActivesList := make(chan *personal.ActivesList)
 	defer func() {
 		if err := recover(); err != nil {
-			cxt.Errorf("handleLastTweetActiveList: %v", err)
+			cxt.Errorf("handleTweetActiveList: %v", err)
 			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
 		}
 	}()
@@ -409,12 +417,45 @@ func handleTweetActiveList(w http.ResponseWriter, r *http.Request) {
 	pg, _ := strconv.Atoi(page)
 	go personal.TweetActiveList(cxt, session, access_token, user, pg, chActivesList)
 	pActivesList := <-chActivesList
-	
+
 	s := "null"
 	if pActivesList != nil {
 		s = pActivesList.StringActivesArray()
 	}
 	fmt.Sprintf(`{"status":%d, "actives":%s}`, common.STATUS_OK, s)
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Show  comment actives.
+func handleCommentActiveList(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chActivesList := make(chan *personal.ActivesList)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleCommentActiveList: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	uid := args[common.UID][0]   //User id
+	page := args[common.PAGE][0] //Which page
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	user, _ := strconv.Atoi(uid)
+	pg, _ := strconv.Atoi(page)
+	go personal.CommentsActiveList(cxt, session, access_token, user, pg, chActivesList)
+	pActivesList := <-chActivesList
+
+	s := "null"
+	if pActivesList != nil {
+		s = pActivesList.StringActivesArray()
+	}
+	fmt.Sprintf(`{"status":%d, "comments":%s}`, common.STATUS_OK, s)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
