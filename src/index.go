@@ -33,14 +33,18 @@ func init() {
 	http.HandleFunc("/myTweetList", handleMyTweetList)
 	http.HandleFunc("/hotspotTweetList", handleHotspotTweetList)
 	http.HandleFunc("/tweetPub", handleTweetPub)
+	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
+	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
+	http.HandleFunc("/tweetActiveList", handleTweetActiveList)
+	http.HandleFunc("/tweetDetail", handleTweetDetail)
 	http.HandleFunc("/friendsList", handleFriendsList)
 	http.HandleFunc("/userInformation", handlePersonal)
 	http.HandleFunc("/updateRelation", handleUpdateRelation)
 	http.HandleFunc("/myInformation", handleMyInformation)
-	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
-	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
-	http.HandleFunc("/tweetActiveList", handleTweetActiveList)
 	http.HandleFunc("/commentActiveList", handleCommentActiveList)
+	http.HandleFunc("/clearAtNotice", handleClearAtNotice)
+	http.HandleFunc("/clearCommentsNotice", handleClearCommentsNotice)
+
 }
 
 func decodeBase64(s string) []byte {
@@ -456,6 +460,76 @@ func handleCommentActiveList(w http.ResponseWriter, r *http.Request) {
 		s = pActivesList.StringActivesArray()
 	}
 	fmt.Sprintf(`{"status":%d, "comments":%s}`, common.STATUS_OK, s)
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Get detail of a single tweet.
+func handleTweetDetail(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chTweet := make(chan *tweet.Tweet)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetDetail: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	id := args[common.ID][0] //Tweet id
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	i, _ := strconv.Atoi(id)
+
+	go tweet.TweetDetail(cxt, session, access_token, i, chTweet)
+	pTweet := <-chTweet
+
+	s := fmt.Sprintf(`{"status":%d, "tweet":%s}`, common.STATUS_OK, pTweet.String())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Clear "@me" notice
+func handleClearAtNotice(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chResult := make(chan *common.Result)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetDetail: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	pRes := common.ClearAtNotice(cxt, session, access_token, chResult)
+	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Clear notice of comments.
+func handleClearCommentsNotice(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chResult := make(chan *common.Result)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleCclearCommentsNotice: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	pRes := common.ClearCommentsNotice(cxt, session, access_token, chResult)
+	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
