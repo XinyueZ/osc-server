@@ -32,13 +32,13 @@ func (self *Result) String() (s string) {
 
 func ClearAtNotice(cxt appengine.Context, session string, access_token string, ch chan *Result) (pResult *Result) {
 	go ClearNotice(cxt, session, access_token, 1, ch)
-	pResult =<-ch
+	pResult = <-ch
 	return
 }
 
 func ClearCommentsNotice(cxt appengine.Context, session string, access_token string, ch chan *Result) (pResult *Result) {
 	go ClearNotice(cxt, session, access_token, 3, ch)
-	pResult= <-ch
+	pResult = <-ch
 	return
 }
 

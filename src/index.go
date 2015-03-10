@@ -35,13 +35,13 @@ func init() {
 	http.HandleFunc("/tweetPub", handleTweetPub)
 	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
 	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
-	http.HandleFunc("/tweetActiveList", handleTweetActiveList)
+	http.HandleFunc("/atMeNoticesList", handleAtMeNoticesList)
 	http.HandleFunc("/tweetDetail", handleTweetDetail)
 	http.HandleFunc("/friendsList", handleFriendsList)
 	http.HandleFunc("/userInformation", handlePersonal)
 	http.HandleFunc("/updateRelation", handleUpdateRelation)
 	http.HandleFunc("/myInformation", handleMyInformation)
-	http.HandleFunc("/commentActiveList", handleCommentActiveList)
+	http.HandleFunc("/newCommentsNoticesList", handleNewCommentsNoticesList)
 	http.HandleFunc("/clearAtNotice", handleClearAtNotice)
 	http.HandleFunc("/clearCommentsNotice", handleClearCommentsNotice)
 
@@ -364,7 +364,7 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	if pCommentActivesList != nil {
 		sCommentActivesList = pCommentActivesList.StringActivesArray()
 	}
-	s := fmt.Sprintf(`{"status":%d, "am":%s, "actives" : %s,  "comments":%s}`, common.STATUS_OK, pMyInfo, sTweetActivesList, sCommentActivesList)
+	s := fmt.Sprintf(`{"status":%d, "am":%s, "atMe" : %s,  "comments":%s}`, common.STATUS_OK, pMyInfo, sTweetActivesList, sCommentActivesList)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
@@ -398,13 +398,13 @@ func handleTweetCommentList(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, s)
 }
 
-//Show  tweet actives.
-func handleTweetActiveList(w http.ResponseWriter, r *http.Request) {
+//Show  tweet "at me" notices list.
+func handleAtMeNoticesList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chActivesList := make(chan *personal.ActivesList)
 	defer func() {
 		if err := recover(); err != nil {
-			cxt.Errorf("handleTweetActiveList: %v", err)
+			cxt.Errorf("handleAtMeNoticesList: %v", err)
 			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
 		}
 	}()
@@ -426,18 +426,18 @@ func handleTweetActiveList(w http.ResponseWriter, r *http.Request) {
 	if pActivesList != nil {
 		s = pActivesList.StringActivesArray()
 	}
-	fmt.Sprintf(`{"status":%d, "actives":%s}`, common.STATUS_OK, s)
+	fmt.Sprintf(`{"status":%d, "notices":%s}`, common.STATUS_OK, s)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
 
-//Show  comment actives.
-func handleCommentActiveList(w http.ResponseWriter, r *http.Request) {
+//Show new comment notices list.
+func handleNewCommentsNoticesList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
 	chActivesList := make(chan *personal.ActivesList)
 	defer func() {
 		if err := recover(); err != nil {
-			cxt.Errorf("handleCommentActiveList: %v", err)
+			cxt.Errorf("handleNewCommentsNoticesList: %v", err)
 			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
 		}
 	}()
@@ -459,7 +459,7 @@ func handleCommentActiveList(w http.ResponseWriter, r *http.Request) {
 	if pActivesList != nil {
 		s = pActivesList.StringActivesArray()
 	}
-	fmt.Sprintf(`{"status":%d, "comments":%s}`, common.STATUS_OK, s)
+	fmt.Sprintf(`{"status":%d, "notices":%s}`, common.STATUS_OK, s)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
@@ -519,7 +519,7 @@ func handleClearCommentsNotice(w http.ResponseWriter, r *http.Request) {
 	chResult := make(chan *common.Result)
 	defer func() {
 		if err := recover(); err != nil {
-			cxt.Errorf("handleCclearCommentsNotice: %v", err)
+			cxt.Errorf("handleClearCommentsNotice: %v", err)
 			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
 		}
 	}()
