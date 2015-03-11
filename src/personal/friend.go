@@ -1,7 +1,7 @@
 package personal
 
 import (
-	"common" 
+	"common"
 
 	"encoding/json"
 )
@@ -36,4 +36,3 @@ func (self Friend) String() (s string) {
 	s = string(json)
 	return
 }
-

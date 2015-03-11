@@ -15,9 +15,8 @@ import (
 )
 
 func TweetCommentPub(cxt appengine.Context, session string, access_token string, id int, content string, ch chan *common.Result) {
-	CommentPub(cxt, session , access_token , id , 3, content , ch )
+	CommentPub(cxt, session, access_token, id, 3, content, ch)
 }
-
 
 func CommentPub(cxt appengine.Context, session string, access_token string, id int, catalog int, content string, ch chan *common.Result) {
 	client := urlfetch.Client(cxt)

@@ -14,38 +14,35 @@ import (
 	"net/http"
 )
 
-
 func LastTweetActiveList(cxt appengine.Context, session string, access_token string, user int, page int, ch chan *ActivesList) (pActivesList *ActivesList) {
 	go TweetActiveList(cxt, session, access_token, user, page, ch)
-	pActivesList = <-ch 
+	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReferCount
 	if atMoment > 0 { //Only last new referes will be shown on client.
-		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]  
+		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
 	} else {
 		pActivesList = nil
 	}
 	return
-} 
-
+}
 
 func LastCommentActiveList(cxt appengine.Context, session string, access_token string, user int, page int, ch chan *ActivesList) (pActivesList *ActivesList) {
 	go CommentsActiveList(cxt, session, access_token, user, page, ch)
-	pActivesList = <-ch 
+	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReplyCount
 	if atMoment > 0 { //Only last new replies will be shown on client.
-		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]  
+		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
 	} else {
 		pActivesList = nil
 	}
 	return
-} 
+}
 
-
-func TweetActiveList(cxt appengine.Context, session string, access_token string, user int,   page int, ch chan *ActivesList) {
+func TweetActiveList(cxt appengine.Context, session string, access_token string, user int, page int, ch chan *ActivesList) {
 	Actives(cxt, session, access_token, user, 2, page, ch)
 }
 
-func CommentsActiveList(cxt appengine.Context, session string, access_token string, user int,   page int, ch chan *ActivesList) {
+func CommentsActiveList(cxt appengine.Context, session string, access_token string, user int, page int, ch chan *ActivesList) {
 	Actives(cxt, session, access_token, user, 3, page, ch)
 }
 

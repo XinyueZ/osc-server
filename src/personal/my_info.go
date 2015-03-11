@@ -16,7 +16,7 @@ import (
 
 func MyInformation(cxt appengine.Context, session string, access_token string, ch chan *MyInfo) {
 	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(common.MY_INFORMATION_SCHEME,  access_token)
+	body := fmt.Sprintf(common.MY_INFORMATION_SCHEME, access_token)
 	//fmt.Fprintf(w, `%s\n`, body)
 	if r, e := http.NewRequest(common.POST, common.MY_INFORMATION_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, 0)

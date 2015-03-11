@@ -19,11 +19,14 @@ const (
 
 	TWEET_LIST_URL    = HOST + "tweet_list"
 	TWEET_LIST_SCHEME = "user=%d&access_token=%s&pageIndex=%d&pageSize=25" + DATA_TYPE
-	
-	TWEET_PUB_URL     = HOST + "tweet_pub"
-	TWEET_PUB_SCHEME  = "access_token=%s&msg=%s" + DATA_TYPE
-	
-	TWEET_DETAIL_URL = HOST + "tweet_detail"
+
+	TWEET_PUB_URL    = HOST + "tweet_pub"
+	TWEET_PUB_SCHEME = "access_token=%s&msg=%s" + DATA_TYPE
+
+	COMMENT_REPLY_URL    = HOST + "comment_reply"
+	COMMENT_REPLY_SCHEME = "id=%d&catalog=%d&content=%s&receiver=%d&authorid=%d&replyid=%d&isPostToMyZone=0&access_token=%s" + DATA_TYPE
+
+	TWEET_DETAIL_URL    = HOST + "tweet_detail"
 	TWEET_DETAIL_SCHEME = "id=%d&access_token=%s" + DATA_TYPE
 
 	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
@@ -31,23 +34,23 @@ const (
 
 	USER_INFORMATION_URL    = HOST + "user_information"
 	USER_INFORMATION_SCHEME = "user=%d&friend=%d&access_token=%s" + DATA_TYPE
-	
-	FOCUS_USER_URL = HOST + "update_user_relation"
+
+	FOCUS_USER_URL    = HOST + "update_user_relation"
 	FOCUS_USER_SCHEME = "friend=%d&relation=%d&access_token=%s" + DATA_TYPE
-		
+
 	MY_INFORMATION_URL    = HOST + "my_information"
 	MY_INFORMATION_SCHEME = "access_token=%s" + DATA_TYPE
-	
-	COMMENT_PUB_URL   = HOST + "comment_pub"
+
+	COMMENT_PUB_URL    = HOST + "comment_pub"
 	COMMENT_PUB_SCHEME = "catalog=%d&id=%d&content=%s&access_token=%s" + DATA_TYPE
 
-	COMMENT_LIST_URL   = HOST + "comment_list"
+	COMMENT_LIST_URL    = HOST + "comment_list"
 	COMMENT_LIST_SCHEME = "catalog=%d&id=%d&page=%d&pageSize=30&access_token=%s" + DATA_TYPE
-	
-	ACTIVE_LIST_URL   = HOST + "active_list"
+
+	ACTIVE_LIST_URL    = HOST + "active_list"
 	ACTIVE_LIST_SCHEME = "catalog=%d&user=%d&page=%d&pageSize=30&access_token=%s" + DATA_TYPE
-	
-	CLEAR_NOTICE_URL   = HOST + "clear_notice"
+
+	CLEAR_NOTICE_URL    = HOST + "clear_notice"
 	CLEAR_NOTICE_SCHEME = "type=%d&access_token=%s" + DATA_TYPE
 
 	ID         = "id"

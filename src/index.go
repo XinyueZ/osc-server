@@ -33,6 +33,7 @@ func init() {
 	http.HandleFunc("/myTweetList", handleMyTweetList)
 	http.HandleFunc("/hotspotTweetList", handleHotspotTweetList)
 	http.HandleFunc("/tweetPub", handleTweetPub)
+	http.HandleFunc("/tweetReply", handleTweetReply)
 	http.HandleFunc("/tweetCommentPub", handleTweetCommentPub)
 	http.HandleFunc("/tweetCommentList", handleTweetCommentList)
 	http.HandleFunc("/atMeNoticesList", handleAtMeNoticesList)
@@ -206,6 +207,35 @@ func handleTweetPub(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
+
+//Reply someone of tweets.
+func handleTweetReply(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chTweetReply := make(chan *common.Result)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetReply: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+	id,_ := strconv.Atoi( cookies[2].Value  )					 //The id of original object that contains comments , replys, ie. Tweet, Blog, etc.
+	content := cookies[3].Value          //The content to reply.
+	receiverId,  _ := strconv.Atoi(cookies[4].Value)          //The userId of a person who will get my reply.
+	authorId, _ := strconv.Atoi( cookies[5].Value ) //The userId of author who wirtes the reply.
+	replyId, _ := strconv.Atoi( cookies[6].Value ) //The replied object, ie. a comment.
+
+	pRes := comment.TweetCommentReply(cxt , session  , access_token  , id  , content  , receiverId  , authorId  , replyId  , chTweetReply)
+
+	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+
 
 //Publish comment to tweet.
 func handleTweetCommentPub(w http.ResponseWriter, r *http.Request) {

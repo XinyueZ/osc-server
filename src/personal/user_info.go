@@ -44,11 +44,11 @@ func UserInformation(cxt appengine.Context, session string, access_token string,
 	}
 }
 
-//Update relation between me and friend. 
+//Update relation between me and friend.
 //0-cancle，1-focus
-func UpdateReleation(cxt appengine.Context,  session string, access_token string, friend int, relation int, ch chan *common.Result) {
+func UpdateReleation(cxt appengine.Context, session string, access_token string, friend int, relation int, ch chan *common.Result) {
 	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(common.FOCUS_USER_SCHEME, friend,relation, access_token)
+	body := fmt.Sprintf(common.FOCUS_USER_SCHEME, friend, relation, access_token)
 	//fmt.Fprintf(w, `%s\n`, body)
 	if r, e := http.NewRequest(common.POST, common.FOCUS_USER_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, 0)

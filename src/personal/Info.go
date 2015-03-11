@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 )
 
-
-
 type UserInfo struct {
 	Notice        common.Notice `json:"notice"`
 	Uid           int           `json:"uid"`
@@ -76,8 +74,6 @@ type MyInfo struct {
 	FavoriteCount  int           `json:"favoriteCount"`
 	FollowersCount int           `json:"followersCount"`
 }
-
-
 
 func (self MyInfo) String() (s string) {
 	json, _ := json.Marshal(&self)
