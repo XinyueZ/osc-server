@@ -375,6 +375,13 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	args := r.URL.Query()
+	me, _:= strconv.Atoi(args[common.ME][0] ) //Show me? 0 not, !=0 yes.
+	showMe := false
+	if me > 0 {
+		showMe = true
+	}
+
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
@@ -383,13 +390,13 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	pMyInfo := <-chMyInfo
 
 	//Get first page of active-list of at you of tweets that I joined.
-	pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, chTweetActivesList)
+	pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chTweetActivesList)
 	sTweetActivesList := "null"
 	if pTweetActivesList != nil {
 		sTweetActivesList = pTweetActivesList.StringActivesArray()
 	}
 	//Get first page of active-list of comments of tweets that I've written.
-	pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid, 1, chCommentActivesList)
+	pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chCommentActivesList)
 	sCommentActivesList := "null"
 	if pCommentActivesList != nil {
 		sCommentActivesList = pCommentActivesList.StringActivesArray()
@@ -451,6 +458,11 @@ func handleAtMeNoticesList(w http.ResponseWriter, r *http.Request) {
 	args := r.URL.Query()
 	uid := args[common.UID][0]   //User id
 	page := args[common.PAGE][0] //Which page
+	me, _:= strconv.Atoi(args[common.ME][0] ) //Show me? 0 not, !=0 yes.
+	showMe := false
+	if me > 0 {
+		showMe = true
+	}
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
@@ -458,7 +470,7 @@ func handleAtMeNoticesList(w http.ResponseWriter, r *http.Request) {
 
 	user, _ := strconv.Atoi(uid)
 	pg, _ := strconv.Atoi(page)
-	go personal.TweetActiveList(cxt, session, access_token, user, pg, chActivesList)
+	go personal.TweetActiveList(cxt, session, access_token, user, pg, showMe, chActivesList)
 	pActivesList := <-chActivesList
 
 	s := "null"
@@ -484,6 +496,11 @@ func handleNewCommentsNoticesList(w http.ResponseWriter, r *http.Request) {
 	args := r.URL.Query()
 	uid := args[common.UID][0]   //User id
 	page := args[common.PAGE][0] //Which page
+	me, _:= strconv.Atoi(args[common.ME][0] ) //Show me? 0 not, !=0 yes.
+	showMe := false
+	if me > 0 {
+		showMe = true
+	}
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
@@ -491,7 +508,7 @@ func handleNewCommentsNoticesList(w http.ResponseWriter, r *http.Request) {
 
 	user, _ := strconv.Atoi(uid)
 	pg, _ := strconv.Atoi(page)
-	go personal.CommentsActiveList(cxt, session, access_token, user, pg, chActivesList)
+	go personal.CommentsActiveList(cxt, session, access_token, user, pg, showMe, chActivesList)
 	pActivesList := <-chActivesList
 
 	s := "null"

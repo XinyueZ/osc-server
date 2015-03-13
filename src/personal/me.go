@@ -2,11 +2,11 @@ package personal
 
 import (
 	"bytes"
+	"common"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"common"
 
 	"appengine"
 	"appengine/urlfetch"

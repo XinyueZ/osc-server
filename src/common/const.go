@@ -53,16 +53,18 @@ const (
 	CLEAR_NOTICE_URL    = HOST + "clear_notice"
 	CLEAR_NOTICE_SCHEME = "type=%d&access_token=%s" + DATA_TYPE
 
-	API_USER_URL = HOST + "user"
+	API_USER_URL    = HOST + "user"
 	API_USER_SCHEME = "access_token=%s" + DATA_TYPE
 
-	ID         = "id"
-	UID        = "uid"
-	IDENT      = "ident"
-	PAGE       = "page"
-	MSG        = "msg"
-	FRI        = "fri"
-	REL        = "rel"
+	ID    = "id"
+	UID   = "uid"
+	IDENT = "ident"
+	PAGE  = "page"
+	MSG   = "msg"
+	FRI   = "fri"
+	REL   = "rel"
+	ME    = "me"
+
 	STATUS_OK  = 200
 	STATUS_ERR = 300
 
