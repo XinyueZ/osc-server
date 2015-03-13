@@ -219,23 +219,21 @@ func handleTweetReply(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	cookies := r.Cookies()           //Session in cookies passt
-	session := cookies[0].Value      //Get user-session
-	access_token := cookies[1].Value //Get user-token
-	id,_ := strconv.Atoi( cookies[2].Value  )					 //The id of original object that contains comments , replys, ie. Tweet, Blog, etc.
-	content := cookies[3].Value          //The content to reply.
-	receiverId,  _ := strconv.Atoi(cookies[4].Value)          //The userId of a person who will get my reply.
-	authorId, _ := strconv.Atoi( cookies[5].Value ) //The userId of author who wirtes the reply.
-	replyId, _ := strconv.Atoi( cookies[6].Value ) //The replied object, ie. a comment.
+	cookies := r.Cookies()                          //Session in cookies passt
+	session := cookies[0].Value                     //Get user-session
+	access_token := cookies[1].Value                //Get user-token
+	id, _ := strconv.Atoi(cookies[2].Value)         //The id of original object that contains comments , replys, ie. Tweet, Blog, etc.
+	content := cookies[3].Value                     //The content to reply.
+	receiverId, _ := strconv.Atoi(cookies[4].Value) //The userId of a person who will get my reply.
+	authorId, _ := strconv.Atoi(cookies[5].Value)   //The userId of author who wirtes the reply.
+	replyId, _ := strconv.Atoi(cookies[6].Value)    //The replied object, ie. a comment.
 
-	pRes := comment.TweetCommentReply(cxt , session  , access_token  , id  , content  , receiverId  , authorId  , replyId  , chTweetReply)
+	pRes := comment.TweetCommentReply(cxt, session, access_token, id, content, receiverId, authorId, replyId, chTweetReply)
 
 	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
-
-
 
 //Publish comment to tweet.
 func handleTweetCommentPub(w http.ResponseWriter, r *http.Request) {
@@ -368,6 +366,8 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	chMyInfo := make(chan *personal.MyInfo)
 	chTweetActivesList := make(chan *personal.ActivesList)
 	chCommentActivesList := make(chan *personal.ActivesList)
+	chApiUser := make(chan *personal.Me)
+
 	defer func() {
 		if err := recover(); err != nil {
 			cxt.Errorf("handleMyInformation: %v", err)
@@ -394,7 +394,16 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	if pCommentActivesList != nil {
 		sCommentActivesList = pCommentActivesList.StringActivesArray()
 	}
-	s := fmt.Sprintf(`{"status":%d, "am":%s, "atMe" : %s,  "comments":%s}`, common.STATUS_OK, pMyInfo, sTweetActivesList, sCommentActivesList)
+
+	go personal.GetMe(cxt, session, access_token, chApiUser)
+	pMe := <-chApiUser
+	homeUrl := ""
+	editUrl := ""
+	if pMe != nil {
+		homeUrl = pMe.Url
+		editUrl = pMe.Url + common.EDIT_URL
+	}
+	s := fmt.Sprintf(`{"status":%d, "am":%s,  "url" : {"home":"%s", "edit" : "%s"},  "atMe" : %s,  "comments":%s}`, common.STATUS_OK, pMyInfo, homeUrl, editUrl, sTweetActivesList, sCommentActivesList)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }

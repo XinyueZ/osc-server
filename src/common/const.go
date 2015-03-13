@@ -30,7 +30,7 @@ const (
 	TWEET_DETAIL_SCHEME = "id=%d&access_token=%s" + DATA_TYPE
 
 	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
-	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=99999&relation=%d&access_token=%s" + DATA_TYPE
+	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=999&relation=%d&access_token=%s" + DATA_TYPE
 
 	USER_INFORMATION_URL    = HOST + "user_information"
 	USER_INFORMATION_SCHEME = "user=%d&friend=%d&access_token=%s" + DATA_TYPE
@@ -53,6 +53,9 @@ const (
 	CLEAR_NOTICE_URL    = HOST + "clear_notice"
 	CLEAR_NOTICE_SCHEME = "type=%d&access_token=%s" + DATA_TYPE
 
+	API_USER_URL = HOST + "user"
+	API_USER_SCHEME = "access_token=%s" + DATA_TYPE
+
 	ID         = "id"
 	UID        = "uid"
 	IDENT      = "ident"
@@ -74,4 +77,5 @@ const (
 	AUTH_REF_URL = ORIGINAL + "/action/oauth2/authorize?response_type=code&client_id=%s&redirect_uri=%s"
 	GRANT_TYPE   = "authorization_code"
 	RET_TYPE     = "json"
+	EDIT_URL     = "/admin/profile"
 )
