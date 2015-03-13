@@ -18,6 +18,8 @@ func LastTweetActiveList(cxt appengine.Context, session string, access_token str
 	go TweetActiveList(cxt, session, access_token, user, page, showMe, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReferCount
+	diff := pActivesList.Notice.ReferCount - len(pActivesList.ActivesArray)
+	atMoment -= diff
 	if atMoment > 0 { //Only last new referes will be shown on client.
 		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
 	} else {
@@ -30,6 +32,8 @@ func LastCommentActiveList(cxt appengine.Context, session string, access_token s
 	go CommentsActiveList(cxt, session, access_token, user, page, showMe, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReplyCount
+	diff := pActivesList.Notice.ReplyCount - len(pActivesList.ActivesArray)
+	atMoment -= diff
 	if atMoment > 0 { //Only last new replies will be shown on client.
 		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
 	} else {
