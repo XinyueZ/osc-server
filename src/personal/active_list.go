@@ -18,10 +18,20 @@ func LastTweetActiveList(cxt appengine.Context, session string, access_token str
 	go TweetActiveList(cxt, session, access_token, user, page, showMe, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReferCount
-	diff := pActivesList.Notice.ReferCount - len(pActivesList.ActivesArray)
-	atMoment -= diff
 	if atMoment > 0 { //Only last new referes will be shown on client.
 		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
+		if !showMe {
+			pActivesListRet := new(ActivesList)
+			pActivesListRet.Notice = common.Notice{0, 0, 0, 0}
+			pActivesListRet.ActivesArray = []Active{}
+			for _, v := range pActivesList.ActivesArray {
+				if v.AuthorId != user {
+					pActivesListRet.ActivesArray = append(pActivesListRet.ActivesArray, v)
+					pActivesListRet.Notice.ReferCount++
+				}
+			}
+			pActivesList = pActivesListRet
+		}
 	} else {
 		pActivesList = nil
 	}
@@ -32,10 +42,20 @@ func LastCommentActiveList(cxt appengine.Context, session string, access_token s
 	go CommentsActiveList(cxt, session, access_token, user, page, showMe, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReplyCount
-	diff := pActivesList.Notice.ReplyCount - len(pActivesList.ActivesArray)
-	atMoment -= diff
 	if atMoment > 0 { //Only last new replies will be shown on client.
 		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
+		if !showMe {
+			pActivesListRet := new(ActivesList)
+			pActivesListRet.Notice = common.Notice{0, 0, 0, 0}
+			pActivesListRet.ActivesArray = []Active{}
+			for _, v := range pActivesList.ActivesArray {
+				if v.AuthorId != user {
+					pActivesListRet.ActivesArray = append(pActivesListRet.ActivesArray, v)
+					pActivesListRet.Notice.ReplyCount++
+				}
+			}
+			pActivesList = pActivesListRet
+		}
 	} else {
 		pActivesList = nil
 	}
@@ -59,22 +79,10 @@ func Actives(cxt appengine.Context, session string, access_token string, user in
 			if resp != nil {
 				defer resp.Body.Close()
 			}
-			pActivesList := new(ActivesList)    //Only for temp .
-			pActivesListRet := new(ActivesList) //Real to return.
+			pActivesList := new(ActivesList)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
 				if err := json.Unmarshal(bytes, pActivesList); err == nil {
-					if !showMe {
-						pActivesListRet.Notice = pActivesList.Notice
-						pActivesListRet.ActivesArray = []Active{}
-						for _, v := range pActivesList.ActivesArray {
-							if v.AuthorId != user {
-								pActivesListRet.ActivesArray = append(pActivesListRet.ActivesArray, v)
-							}
-						}
-					} else {
-						pActivesListRet = pActivesList
-					}
-					ch <- pActivesListRet
+					ch <- pActivesList
 				} else {
 					panic(e)
 				}

@@ -45,10 +45,10 @@ const (
 	COMMENT_PUB_SCHEME = "catalog=%d&id=%d&content=%s&access_token=%s" + DATA_TYPE
 
 	COMMENT_LIST_URL    = HOST + "comment_list"
-	COMMENT_LIST_SCHEME = "catalog=%d&id=%d&page=%d&pageSize=30&access_token=%s" + DATA_TYPE
+	COMMENT_LIST_SCHEME = "catalog=%d&id=%d&page=%d&pageSize=99&access_token=%s" + DATA_TYPE
 
 	ACTIVE_LIST_URL    = HOST + "active_list"
-	ACTIVE_LIST_SCHEME = "catalog=%d&user=%d&page=%d&pageSize=30&access_token=%s" + DATA_TYPE
+	ACTIVE_LIST_SCHEME = "catalog=%d&user=%d&page=%d&pageSize=99&access_token=%s" + DATA_TYPE
 
 	CLEAR_NOTICE_URL    = HOST + "clear_notice"
 	CLEAR_NOTICE_SCHEME = "type=%d&access_token=%s" + DATA_TYPE

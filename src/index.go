@@ -19,6 +19,7 @@ import (
 	"personal"
 	"tweet"
 	"user"
+	"favorite"
 )
 
 type Error string
@@ -45,6 +46,9 @@ func init() {
 	http.HandleFunc("/newCommentsNoticesList", handleNewCommentsNoticesList)
 	http.HandleFunc("/clearAtNotice", handleClearAtNotice)
 	http.HandleFunc("/clearCommentsNotice", handleClearCommentsNotice)
+	http.HandleFunc("/tweetFavorites", handleTweetFavorites)
+	http.HandleFunc("/addTweetFavorite", handleAddTweetFavorite)
+	http.HandleFunc("/delTweetFavorite", handleDelTweetFavorite)
 
 }
 
@@ -389,17 +393,24 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	go personal.MyInformation(cxt, session, access_token, chMyInfo)
 	pMyInfo := <-chMyInfo
 
-	//Get first page of active-list of at you of tweets that I joined.
-	pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chTweetActivesList)
 	sTweetActivesList := "null"
-	if pTweetActivesList != nil {
-		sTweetActivesList = pTweetActivesList.StringActivesArray()
+	if pMyInfo.Notice.ReferCount > 0 {
+		//Get first page of active-list of at you of tweets that I joined.
+		pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chTweetActivesList)
+
+		if pTweetActivesList != nil {
+			sTweetActivesList = pTweetActivesList.StringActivesArray()
+		}
 	}
-	//Get first page of active-list of comments of tweets that I've written.
-	pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chCommentActivesList)
+
 	sCommentActivesList := "null"
-	if pCommentActivesList != nil {
-		sCommentActivesList = pCommentActivesList.StringActivesArray()
+	if pMyInfo.Notice.ReplyCount > 0 {
+		//Get first page of active-list of comments of tweets that I've written.
+		pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chCommentActivesList)
+
+		if pCommentActivesList != nil {
+			sCommentActivesList = pCommentActivesList.StringActivesArray()
+		}
 	}
 
 	go personal.GetMe(cxt, session, access_token, chApiUser)
@@ -586,6 +597,78 @@ func handleClearCommentsNotice(w http.ResponseWriter, r *http.Request) {
 
 	pRes := common.ClearCommentsNotice(cxt, session, access_token, chResult)
 	s := fmt.Sprintf(`{"status":%d, "result":%s}`, common.STATUS_OK, pRes.String())
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Get all favorited tweets.
+func handleTweetFavorites(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	chList := make(chan string)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleTweetFavorites: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+
+	args := r.URL.Query()
+	uid , _ := strconv.Atoi(args[common.UID][0] )//User id
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	go favorite.GetTweetFavoritesList(cxt  , session  , access_token  , uid, chList)
+	list:= <- chList
+	s := fmt.Sprintf(`{"status":%d, "favorites":%s}`, common.STATUS_OK, list)
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Add a new favorite of tweet.
+func handleAddTweetFavorite(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleAddTweetFavorite: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+	args := r.URL.Query()
+	uid , _ := strconv.Atoi( args[common.UID][0]) //User id
+	objectId , _ := strconv.Atoi( args[common.ID][0]) //object id
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	favorite.AddTweetFavorite(cxt , session  , access_token  , uid  , objectId  )
+	s := fmt.Sprintf(`{"status":%d }`, common.STATUS_OK )
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+//Delete a favorite of tweet.
+func handleDelTweetFavorite(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	defer func() {
+		if err := recover(); err != nil {
+			cxt.Errorf("handleDelTweetFavorite: %v", err)
+			fmt.Fprintf(w, `{"status":%d}`, common.STATUS_ERR)
+		}
+	}()
+	args := r.URL.Query()
+	uid , _ := strconv.Atoi( args[common.UID][0]) //User id
+	objectId , _ := strconv.Atoi(args[common.ID][0] )//object id
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+
+	favorite.DelTweetFavorite(cxt  , session  , access_token  , uid  , objectId  )
+	s := fmt.Sprintf(`{"status":%d }`, common.STATUS_OK )
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }

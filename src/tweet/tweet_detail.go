@@ -15,6 +15,10 @@ import (
 )
 
 func TweetDetail(cxt appengine.Context, session string, access_token string, id int, ch chan *Tweet) {
+	ch <- SyncTweetDetail(cxt, session, access_token, id)
+}
+
+func SyncTweetDetail(cxt appengine.Context, session string, access_token string, id int ) (pTweet *Tweet){
 	client := urlfetch.Client(cxt)
 	body := fmt.Sprintf(common.TWEET_DETAIL_SCHEME, id, access_token)
 	if r, e := http.NewRequest(common.POST, common.TWEET_DETAIL_URL, bytes.NewBufferString(body)); e == nil {
@@ -23,10 +27,10 @@ func TweetDetail(cxt appengine.Context, session string, access_token string, id 
 			if resp != nil {
 				defer resp.Body.Close()
 			}
-			pTweet := new(Tweet)
+			pTweet = new(Tweet)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
 				if err := json.Unmarshal(bytes, pTweet); err == nil {
-					ch <- pTweet
+					return
 				} else {
 					panic(e)
 				}
@@ -39,4 +43,5 @@ func TweetDetail(cxt appengine.Context, session string, access_token string, id 
 	} else {
 		panic(e)
 	}
+	return
 }
