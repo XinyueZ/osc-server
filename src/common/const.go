@@ -30,7 +30,7 @@ const (
 	TWEET_DETAIL_SCHEME = "id=%d&access_token=%s" + DATA_TYPE
 
 	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
-	PERSONAL_FRIENDS_LIST_SCHEME = "page=1&pageSize=999&relation=%d&access_token=%s" + DATA_TYPE
+	PERSONAL_FRIENDS_LIST_SCHEME = "page=%d&pageSize=50&relation=%d&access_token=%s" + DATA_TYPE
 
 	USER_INFORMATION_URL    = HOST + "user_information"
 	USER_INFORMATION_SCHEME = "user=%d&friend=%d&access_token=%s" + DATA_TYPE

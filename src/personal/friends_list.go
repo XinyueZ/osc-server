@@ -14,9 +14,27 @@ import (
 	"net/http"
 )
 
-func FriendList(cxt appengine.Context, session string, access_token string, relation int, ch chan *FriendsList) {
+func AllFriendList(cxt appengine.Context, session string, access_token string,  relation int,  total int, ch chan *FriendsList)  (pFriendList  *FriendsList) {
+	if total > 0 {
+		page := 1
+		go  FriendList(cxt, session, access_token, page, relation, ch)
+		pFriendList = <- ch
+		for total > len( pFriendList.FriendsArray ) {
+			page++
+			go  FriendList(cxt, session, access_token, page, relation, ch)
+			pMoreFriendsList := <-ch
+			pFriendList.FriendsArray  = append(pFriendList.FriendsArray, pMoreFriendsList.FriendsArray...)
+		}
+	} else {
+		pFriendList = nil
+	}
+	return
+}
+
+
+func FriendList(cxt appengine.Context, session string, access_token string, page int, relation int, ch chan *FriendsList) {
 	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(common.PERSONAL_FRIENDS_LIST_SCHEME, relation, access_token)
+	body := fmt.Sprintf(common.PERSONAL_FRIENDS_LIST_SCHEME,page, relation, access_token)
 	//fmt.Fprintf(w, `%s\n`, body)
 	if r, e := http.NewRequest(common.POST, common.PERSONAL_FRIENDS_LIST_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, 0)

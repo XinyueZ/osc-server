@@ -14,11 +14,13 @@ import (
 	"net/http"
 )
 
-func LastTweetActiveList(cxt appengine.Context, session string, access_token string, user int, page int, showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
+func LastTweetActiveList(cxt appengine.Context, session string, access_token string, user int,   showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
+	page := 1
 	go TweetActiveList(cxt, session, access_token, user, page, showMe, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReferCount
-	if atMoment > 0 { //Only last new referes will be shown on client.
+	
+	if atMoment > 0 {
 		for atMoment > len( pActivesList.ActivesArray ) {
 			page++
 			go TweetActiveList(cxt, session, access_token, user, page, showMe, ch)
@@ -44,12 +46,13 @@ func LastTweetActiveList(cxt appengine.Context, session string, access_token str
 	return
 }
 
-func LastCommentActiveList(cxt appengine.Context, session string, access_token string, user int, page int, showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
+func LastCommentActiveList(cxt appengine.Context, session string, access_token string, user int,  showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
+	page := 1
 	go CommentsActiveList(cxt, session, access_token, user, page, showMe, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReplyCount
 
-	if atMoment > 0 { //Only last new replies will be shown on client.
+	if atMoment > 0 {
 		for atMoment > len( pActivesList.ActivesArray ) {
 			page++
 			go CommentsActiveList(cxt, session, access_token, user, page, showMe, ch)

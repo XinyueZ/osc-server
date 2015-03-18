@@ -271,8 +271,9 @@ func handleTweetCommentPub(w http.ResponseWriter, r *http.Request) {
 //Get all friends.
 func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
+	chMyInfo := make(chan *personal.MyInfo)
 	chFansList := make(chan *personal.FriendsList)
-	chFocusList := make(chan *personal.FriendsList)
+	chFollowList := make(chan *personal.FriendsList)
 	defer func() {
 		if err := recover(); err != nil {
 			cxt.Errorf("handleFriendsList: %v", err)
@@ -284,12 +285,21 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
-	//0-fans|1-who are focused.
-	go personal.FriendList(cxt, session, access_token, 0, chFansList)
-	go personal.FriendList(cxt, session, access_token, 1, chFocusList)
-	pFans := <-chFansList
-	pFocus := <-chFocusList
-	s := fmt.Sprintf(`{"status":%d, "friends":{"fans":%s, "focus" : %s}}`, common.STATUS_OK, pFans.StringFriendsArray(), pFocus.StringFriendsArray())
+	//0-fans|1-who are followed.
+	go personal.MyInformation(cxt, session, access_token, chMyInfo)
+	pMyInfo := <-chMyInfo
+	pFans :=	  personal.AllFriendList(cxt, session, access_token, 0, pMyInfo.FansCount, chFansList)
+	pfollow :=   personal.AllFriendList(cxt, session, access_token, 1, pMyInfo.FollowersCount, chFollowList)
+ 
+	fans := "null"
+	if pFans != nil {
+		fans = pFans.StringFriendsArray()
+	}
+	follow := "null"
+	if pfollow != nil {
+		follow = pfollow.StringFriendsArray()
+	}
+	s := fmt.Sprintf(`{"status":%d, "friends":{"fans":%s, "follow" : %s}}`, common.STATUS_OK, fans, follow)
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }
@@ -348,7 +358,7 @@ func handleUpdateRelation(w http.ResponseWriter, r *http.Request) {
 	}()
 	args := r.URL.Query()
 	fri := args[common.FRI][0] //An id of friend who will be checked.
-	rel := args[common.REL][0] //Update relation between me and user:  0-cancle，1-focus
+	rel := args[common.REL][0] //Update relation between me and user:  0-cancle，1-follow
 
 	re, _ := strconv.Atoi(rel)
 	f, _ := strconv.Atoi(fri)
@@ -396,7 +406,7 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	sTweetActivesList := "null"
 	if pMyInfo.Notice.ReferCount > 0 {
 		//Get first page of active-list of at you of tweets that I joined.
-		pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chTweetActivesList)
+		pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid,   showMe, chTweetActivesList)
 
 		if pTweetActivesList != nil {
 			sTweetActivesList = pTweetActivesList.StringActivesArray()
@@ -406,7 +416,7 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	sCommentActivesList := "null"
 	if pMyInfo.Notice.ReplyCount > 0 {
 		//Get first page of active-list of comments of tweets that I've written.
-		pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid, 1, showMe, chCommentActivesList)
+		pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid,  showMe, chCommentActivesList)
 
 		if pCommentActivesList != nil {
 			sCommentActivesList = pCommentActivesList.StringActivesArray()
