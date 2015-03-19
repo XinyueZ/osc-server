@@ -32,7 +32,7 @@ func SyncTweetDetail(cxt appengine.Context, session string, access_token string,
 				if err := json.Unmarshal(bytes, pTweet); err == nil {
 					return
 				} else {
-					panic(e)
+					pTweet = nil
 				}
 			} else {
 				panic(e)

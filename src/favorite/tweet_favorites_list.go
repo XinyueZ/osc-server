@@ -17,23 +17,31 @@ func GetTweetFavoritesList(cxt appengine.Context, session string, access_token s
 	if l > 0 {
     sort.Sort(tweetFavorites)
 
-		tweets := make(map[int]*tweet.Tweet)
+		tweetsMp := make(map[int]*tweet.Tweet)
 		ch2    := make(chan *tweet.Tweet, l)
 
 		for _, elem := range tweetFavorites {
       go tweet.TweetDetail (cxt, session, access_token, elem.ObjectId, ch2 )
 		}
 
+		mount := 0
 		for index:= 0; index < l; index++ {
 			item := <-ch2
-			tweets[item.Id] = item
+			if item != nil {
+				tweetsMp[item.Id] = item
+				mount++
+			}  
 		}
 
-
-		ret :=  make([]*tweet.Tweet, l)
+		ret :=  make([]*tweet.Tweet, mount)
+		pos := 0 //Loop to mount
 		for index:= 0; index < l; index++ {
 			elem := tweetFavorites[index]
-			ret[index] = tweets[elem.ObjectId]
+			item := tweetsMp[elem.ObjectId]
+			if item != nil {
+				ret[pos] =  item
+				pos++
+			}
 		}
 
 		json, _ := json.Marshal(&ret)
