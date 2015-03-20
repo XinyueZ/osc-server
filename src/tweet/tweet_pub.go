@@ -25,18 +25,22 @@ func TweetPub(cxt appengine.Context, session string, access_token string, msg st
 			}
 			pRes := new(common.Result)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				if err := json.Unmarshal(bytes, pRes); err == nil {
+				if e := json.Unmarshal(bytes, pRes); e == nil {
 					ch <- pRes
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

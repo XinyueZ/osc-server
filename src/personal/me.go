@@ -40,18 +40,22 @@ func GetMe(cxt appengine.Context, session string, access_token string, ch chan *
 			}
 			pMe := new(Me)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				if err := json.Unmarshal(bytes, pMe); err == nil {
+				if e := json.Unmarshal(bytes, pMe); e == nil {
 					ch <- pMe
 				} else {
-					ch <- pMe
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

@@ -14,18 +14,18 @@ import (
 	"net/http"
 )
 
-func LastTweetActiveList(cxt appengine.Context, session string, access_token string, user int,   showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
+func LastTweetActiveList(cxt appengine.Context, session string, access_token string, user int, showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
 	page := 1
-	go TweetActiveList(cxt, session, access_token, user, page, showMe, ch)
+	go Actives(cxt, session, access_token, user, 2, page, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReferCount
-	
+
 	if atMoment > 0 {
-		for atMoment > len( pActivesList.ActivesArray ) {
+		for atMoment > len(pActivesList.ActivesArray) {
 			page++
-			go TweetActiveList(cxt, session, access_token, user, page, showMe, ch)
+			go Actives(cxt, session, access_token, user, 2, page, ch)
 			pMoreActivesList := <-ch
-			pActivesList.ActivesArray  = append(pActivesList.ActivesArray, pMoreActivesList.ActivesArray...)
+			pActivesList.ActivesArray = append(pActivesList.ActivesArray, pMoreActivesList.ActivesArray...)
 		}
 		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
 		if !showMe {
@@ -46,18 +46,18 @@ func LastTweetActiveList(cxt appengine.Context, session string, access_token str
 	return
 }
 
-func LastCommentActiveList(cxt appengine.Context, session string, access_token string, user int,  showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
+func LastCommentActiveList(cxt appengine.Context, session string, access_token string, user int, showMe bool, ch chan *ActivesList) (pActivesList *ActivesList) {
 	page := 1
-	go CommentsActiveList(cxt, session, access_token, user, page, showMe, ch)
+	go Actives(cxt, session, access_token, user, 3, page, ch)
 	pActivesList = <-ch
 	atMoment := pActivesList.Notice.ReplyCount
 
 	if atMoment > 0 {
-		for atMoment > len( pActivesList.ActivesArray ) {
+		for atMoment > len(pActivesList.ActivesArray) {
 			page++
-			go CommentsActiveList(cxt, session, access_token, user, page, showMe, ch)
+			go Actives(cxt, session, access_token, user, 3, page, ch)
 			pMoreActivesList := <-ch
-			pActivesList.ActivesArray  = append(pActivesList.ActivesArray, pMoreActivesList.ActivesArray...)
+			pActivesList.ActivesArray = append(pActivesList.ActivesArray, pMoreActivesList.ActivesArray...)
 		}
 		pActivesList.ActivesArray = pActivesList.ActivesArray[:(atMoment)]
 		if !showMe {
@@ -79,14 +79,14 @@ func LastCommentActiveList(cxt appengine.Context, session string, access_token s
 }
 
 func TweetActiveList(cxt appengine.Context, session string, access_token string, user int, page int, showMe bool, ch chan *ActivesList) {
-	Actives(cxt, session, access_token, user, 2, page, showMe, ch)
+	Actives(cxt, session, access_token, user, 2, page, ch)
 }
 
 func CommentsActiveList(cxt appengine.Context, session string, access_token string, user int, page int, showMe bool, ch chan *ActivesList) {
-	Actives(cxt, session, access_token, user, 3, page, showMe, ch)
+	Actives(cxt, session, access_token, user, 3, page, ch)
 }
 
-func Actives(cxt appengine.Context, session string, access_token string, user int, catalog int, page int, showMe bool, ch chan *ActivesList) {
+func Actives(cxt appengine.Context, session string, access_token string, user int, catalog int, page int, ch chan *ActivesList) {
 	client := urlfetch.Client(cxt)
 	body := fmt.Sprintf(common.ACTIVE_LIST_SCHEME, catalog, user, page, access_token)
 	if r, e := http.NewRequest(common.POST, common.ACTIVE_LIST_URL, bytes.NewBufferString(body)); e == nil {
@@ -97,18 +97,22 @@ func Actives(cxt appengine.Context, session string, access_token string, user in
 			}
 			pActivesList := new(ActivesList)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				if err := json.Unmarshal(bytes, pActivesList); err == nil {
+				if e := json.Unmarshal(bytes, pActivesList); e == nil {
 					ch <- pActivesList
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

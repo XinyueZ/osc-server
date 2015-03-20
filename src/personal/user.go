@@ -32,8 +32,8 @@ func (self UserInfo) String() (s string) {
 		self.Name,
 		self.Ident,
 		self.Province, self.City,
-		self.convert(self.Platforms),
-		self.convert(self.Expertise),
+		convert(self.Platforms),
+		convert(self.Expertise),
 		self.Portrait,
 		self.Gender,
 		self.Relation)
@@ -46,7 +46,7 @@ func (self UserInfo) StringNotice() (s string) {
 	return
 }
 
-func (self UserInfo) convert(a []string) (s string) {
+func convert(a []string) (s string) {
 	s = ""
 	if a != nil && len(a) > 0 {
 		for _, v := range a {
@@ -84,8 +84,8 @@ func (self MyInfo) String() (s string) {
 		self.Name,
 		self.Ident,
 		self.Province, self.City,
-		self.convert(self.Platforms),
-		self.convert(self.Expertise),
+		convert(self.Platforms),
+		convert(self.Expertise),
 		self.Portrait,
 		self.Gender,
 		self.Relation,
@@ -98,15 +98,5 @@ func (self MyInfo) String() (s string) {
 func (self MyInfo) StringNotice() (s string) {
 	json, _ := json.Marshal(&self.Notice)
 	s = string(json)
-	return
-}
-
-func (self MyInfo) convert(a []string) (s string) {
-	s = ""
-	if a != nil && len(a) > 0 {
-		for _, v := range a {
-			s += (v + " ")
-		}
-	}
 	return
 }

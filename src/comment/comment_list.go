@@ -31,18 +31,22 @@ func Comments(cxt appengine.Context, session string, access_token string, id int
 			pCommentList := new(CommentList)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
 				//fmt.Fprintf(w, `%s\n`, string(bytes))
-				if err := json.Unmarshal(bytes, pCommentList); err == nil {
+				if e := json.Unmarshal(bytes, pCommentList); e == nil {
 					ch <- pCommentList
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

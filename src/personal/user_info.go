@@ -28,16 +28,18 @@ func UserInformation(cxt appengine.Context, session string, access_token string,
 			pUserInfo := new(UserInfo)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
 				//fmt.Fprintf(w, `%s\n`, string(bytes))
-				if err := json.Unmarshal(bytes, pUserInfo); err == nil {
+				if e := json.Unmarshal(bytes, pUserInfo); e == nil {
 					ch <- pUserInfo
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
 		panic(e)
@@ -60,20 +62,23 @@ func UpdateReleation(cxt appengine.Context, session string, access_token string,
 			pRes := new(common.Result)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
 				//fmt.Fprintf(w, `%s\n`, string(bytes))
-				if err := json.Unmarshal(bytes, pRes); err == nil {
+				if e := json.Unmarshal(bytes, pRes); e == nil {
 					//pRes.Message =  string(bytes)
 					ch <- pRes
 				} else {
-					//pRes.Message =  string(bytes)
-					ch <- pRes
+					ch <- nil
+					panic(e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
+			ch <- nil
 			panic(e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

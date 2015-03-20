@@ -33,18 +33,22 @@ func TweetList(cxt appengine.Context, uid int, session string, access_token stri
 			}
 			pTweetsList := new(TweetsList)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				if err := json.Unmarshal(bytes, pTweetsList); err == nil {
+				if e := json.Unmarshal(bytes, pTweetsList); e == nil {
 					ch <- pTweetsList
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

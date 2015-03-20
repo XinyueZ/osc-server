@@ -49,7 +49,7 @@ func init() {
 	http.HandleFunc("/tweetFavorites", handleTweetFavorites)
 	http.HandleFunc("/addTweetFavorite", handleAddTweetFavorite)
 	http.HandleFunc("/delTweetFavorite", handleDelTweetFavorite)
-
+	http.HandleFunc("/noRelationPeople", handleNoRelationPeople)
 }
 
 func decodeBase64(s string) []byte {
@@ -290,7 +290,7 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	pMyInfo := <-chMyInfo
 	pFans :=	  personal.AllFriendList(cxt, session, access_token, 0, pMyInfo.FansCount, chFansList)
 	pfollow :=   personal.AllFriendList(cxt, session, access_token, 1, pMyInfo.FollowersCount, chFollowList)
- 
+
 	fans := "null"
 	if pFans != nil {
 		fans = pFans.StringFriendsArray()
@@ -679,6 +679,23 @@ func handleDelTweetFavorite(w http.ResponseWriter, r *http.Request) {
 
 	favorite.DelTweetFavorite(cxt  , session  , access_token  , uid  , objectId  )
 	s := fmt.Sprintf(`{"status":%d }`, common.STATUS_OK )
+	w.Header().Set("Content-Type", common.API_RESTYPE)
+	fmt.Fprintf(w, s)
+}
+
+
+//Get some no relation people.
+func handleNoRelationPeople(w http.ResponseWriter, r *http.Request) {
+	cxt := appengine.NewContext(r)
+	args := r.URL.Query()
+	uid , _ := strconv.Atoi( args[common.UID][0]) //User id
+
+	cookies := r.Cookies()           //Session in cookies passt
+	session := cookies[0].Value      //Get user-session
+	access_token := cookies[1].Value //Get user-token
+
+	s := personal.GetNoRelationPeople(cxt , session  , access_token  , uid  )
+	s  = fmt.Sprintf(`{"status":%d, "people" : %s }`, common.STATUS_OK, s )
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }

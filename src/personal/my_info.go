@@ -28,18 +28,22 @@ func MyInformation(cxt appengine.Context, session string, access_token string, c
 			pMyInfo := new(MyInfo)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
 				//fmt.Fprintf(w, `%s\n`, string(bytes))
-				if err := json.Unmarshal(bytes, pMyInfo); err == nil {
+				if e := json.Unmarshal(bytes, pMyInfo); e == nil {
 					ch <- pMyInfo
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }

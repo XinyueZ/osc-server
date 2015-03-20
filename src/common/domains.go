@@ -54,18 +54,22 @@ func ClearNotice(cxt appengine.Context, session string, access_token string, typ
 			}
 			pResult := new(Result)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				if err := json.Unmarshal(bytes, pResult); err == nil {
+				if e := json.Unmarshal(bytes, pResult); e == nil {
 					ch <- pResult
 				} else {
-					panic(e)
+					ch <- nil
+					cxt.Errorf("Error but still going: %v", e)
 				}
 			} else {
+				ch <- nil
 				panic(e)
 			}
 		} else {
-			panic(e)
+			ch <- nil
+			cxt.Errorf("Error but still going: %v", e)
 		}
 	} else {
+		ch <- nil
 		panic(e)
 	}
 }
