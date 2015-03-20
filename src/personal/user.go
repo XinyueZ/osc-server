@@ -1,102 +1,83 @@
 package personal
 
 import (
-	"common"
 	"fmt"
-
-	"encoding/json"
+	"encoding/xml"
+	"common"
 )
 
 type UserInfo struct {
-	Notice        common.Notice `json:"notice"`
-	Uid           int           `json:"uid"`
-	Name          string        `json:"name"`
-	Ident         string        `json:"ident"`
-	Province      string        `json:"province"`
-	City          string        `json:"city"`
-	Platforms     []string      `json:"platforms"`
-	Expertise     []string      `json:"expertise"`
-	Portrait      string        `json:"portrait"`
-	Gender        int           `json:"gender"`   //1-man, 2,famle
-	Relation      int           `json:"relation"` //1-has been focused, 2-focused eachother, 3-no
-	JoinTime      string        `json:"joinTime"`
-	LastLoginTime string        `json:"lastLoginTime"`
+	XMLName xml.Name  `xml:"oschina"`
+	User    UserInfoData `xml:"user"`
 }
+
+type UserInfoData struct {
+	Uid           int    `xml:"uid"`
+	Name          string `xml:"name"`
+	From          string `xml:"from"`
+	Platforms     string `xml:"devplatform"`
+	Expertise     string `xml:"expertise"`
+	Portrait      string `xml:"portrait"`
+	Gender        string `xml:"gender"`   //1-man, 2,famle
+	Relation      int    `xml:"relation"` //1-has been focused, 2-focused eachother, 3-no
+	Score         int    `xml:"score"`
+	Fans          int    `xml:"fans"`
+	Follow        int    `xml:"followers"`
+	JoinTime      string `xml:"jointime"`
+	LastLoginTime string `xml:"latestonline"`
+}
+
 
 func (self UserInfo) String() (s string) {
-	json, _ := json.Marshal(&self)
+	json, _ := xml.Marshal(&self.User)
 	s = string(json)
 	s = fmt.Sprintf(
-		`{"uid":%d, "name":"%s", "ident" : "%s","province":"%s", "city" : "%s","platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d}`,
-		self.Uid,
-		self.Name,
-		self.Ident,
-		self.Province, self.City,
-		convert(self.Platforms),
-		convert(self.Expertise),
-		self.Portrait,
-		self.Gender,
-		self.Relation)
+		`{"uid":%d, "name":"%s",  "from":"%s",  "platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d, "fans":%d, "follow":%d}`,
+		self.User.Uid,
+		self.User.Name,
+		self.User.From,
+		self.User.Platforms,
+		self.User.Expertise,
+		self.User.Portrait,
+		genderConver(self.User.Gender),
+		self.User.Relation,
+		self.User.Fans,
+		self.User.Follow 	)
 	return
 }
 
-func (self UserInfo) StringNotice() (s string) {
-	json, _ := json.Marshal(&self.Notice)
-	s = string(json)
-	return
-}
 
-func convert(a []string) (s string) {
-	s = ""
-	if a != nil && len(a) > 0 {
-		for _, v := range a {
-			s += (v + " ")
-		}
-	}
-	return
-}
 
 type MyInfo struct {
-	Notice         common.Notice `json:"notice"`
-	Uid            int           `json:"uid"`
-	Name           string        `json:"name"`
-	Ident          string        `json:"ident"`
-	Province       string        `json:"province"`
-	City           string        `json:"city"`
-	Platforms      []string      `json:"platforms"`
-	Expertise      []string      `json:"expertise"`
-	Portrait       string        `json:"portrait"`
-	Gender         int           `json:"gender"`   //1-man, 2,famle
-	Relation       int           `json:"relation"` //1-has been focused, 2-focused eachother, 3-no
-	JoinTime       string        `json:"joinTime"`
-	LastLoginTime  string        `json:"lastLoginTime"`
-	FansCount      int           `json:"fansCount"`
-	FavoriteCount  int           `json:"favoriteCount"`
-	FollowersCount int           `json:"followersCount"`
+	XMLName xml.Name  `xml:"oschina"`
+	User    UserInfoData `xml:"user"`
+	Notice   common.NoticeData  `xml:"notice"`
 }
 
 func (self MyInfo) String() (s string) {
-	json, _ := json.Marshal(&self)
+	json, _ := xml.Marshal(&self.User)
 	s = string(json)
 	s = fmt.Sprintf(
-		`{"uid":%d, "name":"%s", "ident" : "%s","province":"%s", "city" : "%s","platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d, "fansCount":%d, "favoriteCount":%d,"followersCount":%d}`,
-		self.Uid,
-		self.Name,
-		self.Ident,
-		self.Province, self.City,
-		convert(self.Platforms),
-		convert(self.Expertise),
-		self.Portrait,
-		self.Gender,
-		self.Relation,
-		self.FansCount,
-		self.FavoriteCount,
-		self.FollowersCount)
-	return
+		`{"uid":%d, "name":"%s",  "from":"%s",  "platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d, "fans":%d, "follow":%d}`,
+		self.User.Uid,
+		self.User.Name,
+		self.User.From,
+		self.User.Platforms,
+		self.User.Expertise,
+		self.User.Portrait,
+		genderConver(self.User.Gender),
+		self.User.Relation,
+		self.User.Fans,
+		self.User.Follow)
+		return
 }
 
-func (self MyInfo) StringNotice() (s string) {
-	json, _ := json.Marshal(&self.Notice)
-	s = string(json)
+
+func genderConver(gender string) (n int) {
+	if gender == "男" {
+		n = 1
+	} else {
+		n = 2
+	}
 	return
 }

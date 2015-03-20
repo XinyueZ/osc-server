@@ -19,6 +19,15 @@ type Notice struct {
 	ReferCount int `json:"referCount"`
 }
 
+type NoticeData struct {
+	ReplyCount int `xml:"reviewCount"`
+	MsgCount   int `xml:"msgCount"`
+	FansCount  int `xml:"newFansCount"`
+	ReferCount int `xml:"atmeCount"`
+}
+
+
+
 type Result struct {
 	Code     string `json:"error"`
 	Relation int    `json:"relation"`

@@ -72,98 +72,19 @@ func otherFriendList(cxt appengine.Context, session string, access_token string,
 	}
 }
 
-//Temp soluation to get other users information for overhead calling.
-//After application being released and getting unlimit openAPI.
-//We must switch to openAPI instead API.
-type OtherUserInfo struct {
-	XMLName xml.Name  `xml:"oschina"`
-	User    OtherUser `xml:"user"`
-}
 
-func (self OtherUserInfo) String() (s string) {
-	json, _ := xml.Marshal(&self.User)
-	s = string(json)
-	s = fmt.Sprintf(
-		`{"uid":%d, "name":"%s",  "from":"%s",  "platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d}`,
-		self.User.Uid,
-		self.User.Name,
-		self.User.From,
-		self.User.Platforms,
-		self.User.Expertise,
-		self.User.Portrait,
-		genderConver(self.User.Gender),
-		self.User.Relation)
-	return
-}
-
-func genderConver(gender string) (n int) {
-	if gender == "男" {
-		n = 1
-	} else {
-		n = 2
-	}
-	return
-}
-
-type OtherUser struct {
-	Uid           int    `xml:"uid"`
-	Name          string `xml:"name"`
-	From          string `xml:"from"`
-	Platforms     string `xml:"devplatform"`
-	Expertise     string `xml:"expertise"`
-	Portrait      string `xml:"portrait"`
-	Gender        string `xml:"gender"`   //1-man, 2,famle
-	Relation      int    `xml:"relation"` //1-has been focused, 2-focused eachother, 3-no
-	Score         int    `xml:"score"`
-	Fans          int    `xml:"fans"`
-	Follow        int    `xml:"followers"`
-	JoinTime      string `xml:"jointime"`
-	LastLoginTime string `xml:"latestonline"`
-}
-
-//Specical API to get friends of other people, it is not usage of openAPI.
-func otherUserInformation(cxt appengine.Context, session string, access_token string, uid int, hisId int, ch chan *OtherUserInfo) {
-	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(API_FRIENDS_INFO_SCHEME, uid, hisId, "")
-	if r, e := http.NewRequest(POST, API_FRIENDS_INFO_URL, bytes.NewBufferString(body)); e == nil {
-		common.MakeHeader(r, "oscid="+session, 0)
-		if resp, e := client.Do(r); e == nil {
-			if resp != nil {
-				defer resp.Body.Close()
-			}
-			pInfo := new(OtherUserInfo)
-			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				if e := xml.Unmarshal(bytes, pInfo); e == nil {
-					ch <- pInfo
-				} else {
-					ch <- nil
-					cxt.Errorf("Error but still going: %v", e)
-				}
-			} else {
-				ch <- nil
-				panic(e)
-			}
-		} else {
-			ch <- nil
-			cxt.Errorf("Error but still going: %v", e)
-		}
-	} else {
-		ch <- nil
-		panic(e)
-	}
-}
 
 //Get no relation people, they are friends other my friends.
 func GetNoRelationPeople(cxt appengine.Context, session string, access_token string, uid int) (s string) {
 	chMyInfo := make(chan *MyInfo)
 	chFansList := make(chan *FriendsList)
 	chFollowList := make(chan *FriendsList)
-	chUserInfo := make(chan *OtherUserInfo)
+	chUserInfo := make(chan *UserInfo)
 	chOtherFriendsFans := make(chan *OtherFriendsList)
 	chOtherFriendsFollow := make(chan *OtherFriendsList)
 
 	//Get number of current friends.
-	go MyInformation(cxt, session, access_token, chMyInfo)
+	go MyInformation(cxt, session, uid, chMyInfo)
 	pMyInfo := <-chMyInfo
 
 	if pMyInfo == nil {
@@ -171,8 +92,8 @@ func GetNoRelationPeople(cxt appengine.Context, session string, access_token str
 	}
 
 	//Get all friends, inc. fans, followers.
-	pFans := AllFriendList(cxt, session, access_token, 0, pMyInfo.FansCount, chFansList)
-	pfollow := AllFriendList(cxt, session, access_token, 1, pMyInfo.FollowersCount, chFollowList)
+	pFans := AllFriendList(cxt, session, access_token, 0, pMyInfo.User.Fans, chFansList)
+	pfollow := AllFriendList(cxt, session, access_token, 1, pMyInfo.User.Follow, chFollowList)
 
 	if pFans == nil && pfollow == nil {
 		return "null"
@@ -219,7 +140,7 @@ func GetNoRelationPeople(cxt appengine.Context, session string, access_token str
 	if l > 0 {
 		//Make feeds for client to provide all user-information.
 		for _, a := range availables {
-			go otherUserInformation(cxt, session, access_token, uid, a.UserId, chUserInfo)
+			go UserInformation(cxt, session, uid, a.UserId, chUserInfo)
 		}
 
 		s = "["

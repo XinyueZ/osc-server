@@ -281,15 +281,18 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	args := r.URL.Query()
+	uid, _ := strconv.Atoi( args[common.UID][0] )    //Which tweet item
+
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
 	//0-fans|1-who are followed.
-	go personal.MyInformation(cxt, session, access_token, chMyInfo)
+	go personal.MyInformation(cxt, session, uid, chMyInfo)
 	pMyInfo := <-chMyInfo
-	pFans :=	  personal.AllFriendList(cxt, session, access_token, 0, pMyInfo.FansCount, chFansList)
-	pfollow :=   personal.AllFriendList(cxt, session, access_token, 1, pMyInfo.FollowersCount, chFollowList)
+	pFans :=	  personal.AllFriendList(cxt, session, access_token, 0, pMyInfo.User.Fans, chFansList)
+	pfollow :=   personal.AllFriendList(cxt, session, access_token, 1, pMyInfo.User.Follow, chFollowList)
 
 	fans := "null"
 	if pFans != nil {
@@ -329,7 +332,7 @@ func handlePersonal(w http.ResponseWriter, r *http.Request) {
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
-	go personal.UserInformation(cxt, session, access_token, u, f, chUserInfo)
+	go personal.UserInformation(cxt, session, u, f, chUserInfo)
 	pUserInfo := <-chUserInfo
 
 	s := ""
@@ -391,6 +394,8 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 
 	args := r.URL.Query()
 	me, _:= strconv.Atoi(args[common.ME][0] ) //Show me? 0 not, !=0 yes.
+	uid, _ := strconv.Atoi( args[common.UID][0]  )   //Which tweet item
+
 	showMe := false
 	if me > 0 {
 		showMe = true
@@ -400,23 +405,30 @@ func handleMyInformation(w http.ResponseWriter, r *http.Request) {
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
-	go personal.MyInformation(cxt, session, access_token, chMyInfo)
+	go personal.MyInformation(cxt, session, uid, chMyInfo)
 	pMyInfo := <-chMyInfo
 
+	// go personal.TweetActiveList(cxt, session, access_token, uid,  1, showMe, chTweetActivesList)
+	// sTweetActivesList := (<-chTweetActivesList).StringActivesArray()//"null"
 	sTweetActivesList := "null"
 	if pMyInfo.Notice.ReferCount > 0 {
+		cxt.Infof("ReferCount: %v", pMyInfo.Notice.ReferCount )
 		//Get first page of active-list of at you of tweets that I joined.
-		pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, pMyInfo.Uid,   showMe, chTweetActivesList)
+		pTweetActivesList := personal.LastTweetActiveList(cxt, session, access_token, uid,   showMe, chTweetActivesList)
 
 		if pTweetActivesList != nil {
 			sTweetActivesList = pTweetActivesList.StringActivesArray()
+			cxt.Infof("sTweetActivesList: %v", sTweetActivesList )
 		}
 	}
 
+	// go personal.CommentsActiveList(cxt, session, access_token, uid, 1, showMe, chCommentActivesList)
+	// sCommentActivesList := ( <-chCommentActivesList).StringActivesArray()//"null"
 	sCommentActivesList := "null"
 	if pMyInfo.Notice.ReplyCount > 0 {
+		cxt.Infof("ReplyCount: %v", pMyInfo.Notice.ReplyCount )
 		//Get first page of active-list of comments of tweets that I've written.
-		pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, pMyInfo.Uid,  showMe, chCommentActivesList)
+		pCommentActivesList := personal.LastCommentActiveList(cxt, session, access_token, uid,  showMe, chCommentActivesList)
 
 		if pCommentActivesList != nil {
 			sCommentActivesList = pCommentActivesList.StringActivesArray()

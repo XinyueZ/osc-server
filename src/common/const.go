@@ -3,7 +3,8 @@ package common
 const (
 	OSC             = "www.oschina.net"
 	ORIGINAL        = "https://www.oschina.net"
-	HOST            = ORIGINAL + "/action/openapi/"
+	HOST            =  ORIGINAL + "/action/openapi/"
+	INT_HOST        =  ORIGINAL + "/action/api/"
 	API_REQTYPE     = "application/x-www-form-urlencoded; charset=UTF-8" //Request type
 	API_RESTYPE     = "application/json"                                 //Response types
 	POST            = "POST"
@@ -32,14 +33,14 @@ const (
 	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
 	PERSONAL_FRIENDS_LIST_SCHEME = "page=%d&pageSize=50&relation=%d&access_token=%s" + DATA_TYPE
 
-	USER_INFORMATION_URL    = HOST + "user_information"
-	USER_INFORMATION_SCHEME = "user=%d&friend=%d&access_token=%s" + DATA_TYPE
+	USER_INFORMATION_URL    = INT_HOST + "user_information"
+	USER_INFORMATION_SCHEME = "uid=%d&hisuid=%d&hisname=%s&pageIndex=0&pageSize=0"
 
 	FOCUS_USER_URL    = HOST + "update_user_relation"
 	FOCUS_USER_SCHEME = "friend=%d&relation=%d&access_token=%s" + DATA_TYPE
 
-	MY_INFORMATION_URL    = HOST + "my_information"
-	MY_INFORMATION_SCHEME = "access_token=%s" + DATA_TYPE
+	MY_INFORMATION_URL    = INT_HOST + "my_information"
+	MY_INFORMATION_SCHEME = "uid=%d"
 
 	COMMENT_PUB_URL    = HOST + "comment_pub"
 	COMMENT_PUB_SCHEME = "catalog=%d&id=%d&content=%s&access_token=%s" + DATA_TYPE
