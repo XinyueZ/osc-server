@@ -26,8 +26,6 @@ type NoticeData struct {
 	ReferCount int `xml:"atmeCount"`
 }
 
-
-
 type Result struct {
 	Code     string `json:"error"`
 	Relation int    `json:"relation"`

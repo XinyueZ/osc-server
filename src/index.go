@@ -271,7 +271,6 @@ func handleTweetCommentPub(w http.ResponseWriter, r *http.Request) {
 //Get all friends.
 func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
-	chMyInfo := make(chan *personal.MyInfo)
 	chFansList := make(chan *personal.FriendsList)
 	chFollowList := make(chan *personal.FriendsList)
 	defer func() {
@@ -286,13 +285,13 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
-	access_token := cookies[1].Value //Get user-token
+	//access_token := cookies[1].Value //Get user-token
 
 	//0-fans|1-who are followed.
-	go personal.MyInformation(cxt, session, uid, chMyInfo)
-	pMyInfo := <-chMyInfo
-	pFans :=	  personal.AllFriendList(cxt, session, access_token, 0, pMyInfo.User.Fans, chFansList)
-	pfollow :=   personal.AllFriendList(cxt, session, access_token, 1, pMyInfo.User.Follow, chFollowList)
+	pFans :=	  personal.AllMyFriendList(cxt, session, uid, 0,  chFansList)
+	pfollow :=   personal.AllMyFriendList(cxt, session, uid, 1,   chFollowList)
+
+
 
 	fans := "null"
 	if pFans != nil {
@@ -302,7 +301,8 @@ func handleFriendsList(w http.ResponseWriter, r *http.Request) {
 	if pfollow != nil {
 		follow = pfollow.StringFriendsArray()
 	}
-	s := fmt.Sprintf(`{"status":%d, "friends":{"fans":%s, "follow" : %s}}`, common.STATUS_OK, fans, follow)
+
+	s := fmt.Sprintf(`{"status":%d, "friends":{"fans":%s, "follow" : %s}}`, common.STATUS_OK, fans, follow  )
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
 }

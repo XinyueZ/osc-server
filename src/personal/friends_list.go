@@ -2,50 +2,82 @@ package personal
 
 import (
 	"common"
-	"encoding/json"
 
 	"appengine"
 	"appengine/urlfetch"
 
 	"bytes"
+	"encoding/xml"
 	"fmt"
 
 	"io/ioutil"
 	"net/http"
 )
 
-func AllFriendList(cxt appengine.Context, session string, access_token string, relation int, total int, ch chan *FriendsList) (pFriendList *FriendsList) {
+func AllMyFriendList(cxt appengine.Context, session string, uid int, relation int, ch chan *FriendsList) (pFriendList *FriendsList) {
+	chMyInfo := make(chan *MyInfo)
+	go MyInformation(cxt, session, uid, chMyInfo)
+	pMyInfo := <-chMyInfo
+
+	if pMyInfo == nil {
+		return
+	}
+
+	total := 0
+	switch relation {
+	case 0:
+		total = pMyInfo.User.Fans
+	case 1:
+		total = pMyInfo.User.Follow
+	}
+
 	if total > 0 {
-		page := 1
-		go FriendList(cxt, session, access_token, page, relation, ch)
+		go FriendList(cxt, session, uid, 0, relation, total, ch)
 		pFriendList = <-ch
-		for total > len(pFriendList.FriendsArray) {
-			page++
-			go FriendList(cxt, session, access_token, page, relation, ch)
-			pMoreFriendsList := <-ch
-			pFriendList.FriendsArray = append(pFriendList.FriendsArray, pMoreFriendsList.FriendsArray...)
-		}
 	} else {
 		pFriendList = nil
 	}
 	return
 }
 
-func FriendList(cxt appengine.Context, session string, access_token string, page int, relation int, ch chan *FriendsList) {
+func AllHisFriendList(cxt appengine.Context, session string, uid int, friend int, relation int, ch chan *FriendsList) (pFriendList *FriendsList) {
+	chInfo := make(chan *UserInfo)
+	go UserInformation(cxt, session, uid, friend, chInfo)
+	pInfo := <-chInfo
+
+	if pInfo == nil {
+		return
+	}
+
+	total := 0
+	switch relation {
+	case 0:
+		total = pInfo.User.Fans
+	case 1:
+		total = pInfo.User.Follow
+	}
+
+	if total > 0 {
+		go FriendList(cxt, session, friend, 0, relation, total, ch)
+		pFriendList = <-ch
+	} else {
+		pFriendList = nil
+	}
+	return
+}
+
+func FriendList(cxt appengine.Context, session string, uid int, page int, relation int, total int, ch chan *FriendsList) {
 	client := urlfetch.Client(cxt)
-	body := fmt.Sprintf(common.PERSONAL_FRIENDS_LIST_SCHEME, page, relation, access_token)
-	//fmt.Fprintf(w, `%s\n`, body)
+	body := fmt.Sprintf(common.PERSONAL_FRIENDS_LIST_SCHEME, uid, page, relation, total)
 	if r, e := http.NewRequest(common.POST, common.PERSONAL_FRIENDS_LIST_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, 0)
-		//fmt.Fprintf(w, `oscid=%s\n`, session)
 		if resp, e := client.Do(r); e == nil {
 			if resp != nil {
 				defer resp.Body.Close()
 			}
 			pFriendsList := new(FriendsList)
 			if bytes, e := ioutil.ReadAll(resp.Body); e == nil {
-				//fmt.Fprintf(w, `%s\n`, string(bytes))
-				if e := json.Unmarshal(bytes, pFriendsList); e == nil {
+				if e := xml.Unmarshal(bytes, pFriendsList); e == nil {
 					ch <- pFriendsList
 				} else {
 					ch <- nil

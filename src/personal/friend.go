@@ -1,38 +1,54 @@
 package personal
 
 import (
-	"common"
-
-	"encoding/json"
+	"encoding/xml"
+	"fmt"
 )
 
+type FriendsArray []Friend
+
+func (self FriendsArray) String() (s string) {
+	s = "["
+	i := 0
+	m := len(self)
+	for _, f := range self {
+		t := fmt.Sprintf(
+			`{"expertise":"%s", "name":"%s",  "userid":%d,  "gender":%d, "portrait" : "%s"}`,
+			f.Expertise, f.Name, f.UserId, f.Gender, f.Portrait)
+		s += t
+		if i != m-1 {
+			s += ","
+		}
+		i++
+	}
+	s += "]"
+
+	return
+}
+
 type FriendsList struct {
-	Notice       common.Notice `json:"notice"`
-	FriendsArray []Friend      `json:"userList"`
+	XMLName xml.Name `xml:"oschina"`
+	Friends Friends  `xml:"friends"`
+}
+
+type Friends struct {
+	FriendsArray FriendsArray `xml:"friend"`
 }
 
 func (self FriendsList) StringFriendsArray() (s string) {
-	json, _ := json.Marshal(&self.FriendsArray)
-	s = string(json)
-	return
-}
-
-func (self FriendsList) StringNotice() (s string) {
-	json, _ := json.Marshal(&self.Notice)
-	s = string(json)
-	return
+	return self.Friends.FriendsArray.String()
 }
 
 type Friend struct {
-	Expertise string `json:"expertise"`
-	Name      string `json:"name"`
-	UserId    int    `json:"userid"`
-	Gender    int    `json:"gender"` //1-man|2-lady
-	Portrait  string `json:"portrait"`
+	Expertise string `xml:"expertise"`
+	Name      string `xml:"name"`
+	UserId    int    `xml:"userid"`
+	Gender    int    `xml:"gender"` //1-man|2-lady
+	Portrait  string `xml:"portrait"`
 }
 
 func (self Friend) String() (s string) {
-	json, _ := json.Marshal(&self)
+	json, _ := xml.Marshal(&self)
 	s = string(json)
 	return
 }

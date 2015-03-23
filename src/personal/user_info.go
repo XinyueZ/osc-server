@@ -15,10 +15,10 @@ import (
 	"net/http"
 )
 
-func UserInformation(cxt appengine.Context, session string,  uid int, friend int, ch chan *UserInfo) {
+func UserInformation(cxt appengine.Context, session string, uid int, friend int, ch chan *UserInfo) {
 	client := urlfetch.Client(cxt)
 	body := fmt.Sprintf(common.USER_INFORMATION_SCHEME, uid, friend, "")
-	if r, e := http.NewRequest(POST, common.USER_INFORMATION_URL, bytes.NewBufferString(body)); e == nil {
+	if r, e := http.NewRequest(common.POST, common.USER_INFORMATION_URL, bytes.NewBufferString(body)); e == nil {
 		common.MakeHeader(r, "oscid="+session, 0)
 		if resp, e := client.Do(r); e == nil {
 			if resp != nil {
@@ -46,12 +46,11 @@ func UserInformation(cxt appengine.Context, session string,  uid int, friend int
 	}
 }
 
-
 func MyInformation(cxt appengine.Context, session string, uid int, ch chan *MyInfo) {
 	client := urlfetch.Client(cxt)
 	body := fmt.Sprintf(common.MY_INFORMATION_SCHEME, uid)
 	if r, e := http.NewRequest(common.POST, common.MY_INFORMATION_URL, bytes.NewBufferString(body)); e == nil {
-		common.MakeHeader(r, "oscid="+session, 0) 
+		common.MakeHeader(r, "oscid="+session, 0)
 		if resp, e := client.Do(r); e == nil {
 			if resp != nil {
 				defer resp.Body.Close()
@@ -77,8 +76,6 @@ func MyInformation(cxt appengine.Context, session string, uid int, ch chan *MyIn
 		panic(e)
 	}
 }
-
-
 
 //Update relation between me and friend.
 //0-cancle，1-focus

@@ -3,8 +3,8 @@ package common
 const (
 	OSC             = "www.oschina.net"
 	ORIGINAL        = "https://www.oschina.net"
-	HOST            =  ORIGINAL + "/action/openapi/"
-	INT_HOST        =  ORIGINAL + "/action/api/"
+	HOST            = ORIGINAL + "/action/openapi/"
+	INT_HOST        = ORIGINAL + "/action/api/"
 	API_REQTYPE     = "application/x-www-form-urlencoded; charset=UTF-8" //Request type
 	API_RESTYPE     = "application/json"                                 //Response types
 	POST            = "POST"
@@ -30,8 +30,8 @@ const (
 	TWEET_DETAIL_URL    = HOST + "tweet_detail"
 	TWEET_DETAIL_SCHEME = "id=%d&access_token=%s" + DATA_TYPE
 
-	PERSONAL_FRIENDS_LIST_URL    = HOST + "friends_list"
-	PERSONAL_FRIENDS_LIST_SCHEME = "page=%d&pageSize=50&relation=%d&access_token=%s" + DATA_TYPE
+	PERSONAL_FRIENDS_LIST_URL    = INT_HOST + "friends_list"
+	PERSONAL_FRIENDS_LIST_SCHEME = "uid=%d&page=%d&relation=%d&pageSize=%d"
 
 	USER_INFORMATION_URL    = INT_HOST + "user_information"
 	USER_INFORMATION_SCHEME = "uid=%d&hisuid=%d&hisname=%s&pageIndex=0&pageSize=0"

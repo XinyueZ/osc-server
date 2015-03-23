@@ -1,13 +1,13 @@
 package personal
 
 import (
-	"fmt"
-	"encoding/xml"
 	"common"
+	"encoding/xml"
+	"fmt"
 )
 
 type UserInfo struct {
-	XMLName xml.Name  `xml:"oschina"`
+	XMLName xml.Name     `xml:"oschina"`
 	User    UserInfoData `xml:"user"`
 }
 
@@ -27,36 +27,7 @@ type UserInfoData struct {
 	LastLoginTime string `xml:"latestonline"`
 }
 
-
 func (self UserInfo) String() (s string) {
-	json, _ := xml.Marshal(&self.User)
-	s = string(json)
-	s = fmt.Sprintf(
-		`{"uid":%d, "name":"%s",  "from":"%s",  "platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d, "fans":%d, "follow":%d}`,
-		self.User.Uid,
-		self.User.Name,
-		self.User.From,
-		self.User.Platforms,
-		self.User.Expertise,
-		self.User.Portrait,
-		genderConver(self.User.Gender),
-		self.User.Relation,
-		self.User.Fans,
-		self.User.Follow 	)
-	return
-}
-
-
-
-type MyInfo struct {
-	XMLName xml.Name  `xml:"oschina"`
-	User    UserInfoData `xml:"user"`
-	Notice   common.NoticeData  `xml:"notice"`
-}
-
-func (self MyInfo) String() (s string) {
-	json, _ := xml.Marshal(&self.User)
-	s = string(json)
 	s = fmt.Sprintf(
 		`{"uid":%d, "name":"%s",  "from":"%s",  "platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d, "fans":%d, "follow":%d}`,
 		self.User.Uid,
@@ -69,9 +40,30 @@ func (self MyInfo) String() (s string) {
 		self.User.Relation,
 		self.User.Fans,
 		self.User.Follow)
-		return
+	return
 }
 
+type MyInfo struct {
+	XMLName xml.Name          `xml:"oschina"`
+	User    UserInfoData      `xml:"user"`
+	Notice  common.NoticeData `xml:"notice"`
+}
+
+func (self MyInfo) String() (s string) {
+	s = fmt.Sprintf(
+		`{"uid":%d, "name":"%s",  "from":"%s",  "platforms":"%s", "expertise" : "%s","portrait":"%s", "gender" : %d,"relation":%d, "fans":%d, "follow":%d}`,
+		self.User.Uid,
+		self.User.Name,
+		self.User.From,
+		self.User.Platforms,
+		self.User.Expertise,
+		self.User.Portrait,
+		genderConver(self.User.Gender),
+		self.User.Relation,
+		self.User.Fans,
+		self.User.Follow)
+	return
+}
 
 func genderConver(gender string) (n int) {
 	if gender == "男" {
