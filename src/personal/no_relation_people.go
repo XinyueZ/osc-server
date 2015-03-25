@@ -5,7 +5,7 @@ import (
 )
 
 //Get no relation people, they are friends other my friends.
-func GetNoRelationPeople(cxt appengine.Context, session string, access_token string, uid int) (s string) {
+func GetNoRelationPeople(cxt appengine.Context, session string, access_token string,uid int, myPage int, friendPage int ) (s string) {
 	chFansList := make(chan *FriendsList)
 	chFollowList := make(chan *FriendsList)
 	chUserInfo := make(chan *UserInfo)
@@ -13,12 +13,13 @@ func GetNoRelationPeople(cxt appengine.Context, session string, access_token str
 	chOtherFriendsFollow := make(chan *FriendsList)
 
 	//Get all friends, inc. fans, followers.
-	pFans := AllMyFriendList(cxt, session, uid, 0, chFansList)
-	pfollow := AllMyFriendList(cxt, session, uid, 1, chFollowList)
+	pFans := MyFriendList(cxt, session, uid, 0, myPage, chFansList)
+	pfollow := MyFriendList(cxt, session, uid, 1, myPage, chFollowList)
 
 	if pFans == nil && pfollow == nil {
 		return "null"
 	}
+
 
 	//Combine all friends.
 	allFriends := make([]Friend, 0)
@@ -31,23 +32,19 @@ func GetNoRelationPeople(cxt appengine.Context, session string, access_token str
 	}
 
 	//Get all possible friends.
+	friendsOfOther := make([]Friend, 0)
 	for _, friend := range allFriends {
-		go AllHisFriendList(cxt, session, uid, friend.UserId, 0, chOtherFriendsFans)
-		go AllHisFriendList(cxt, session, uid, friend.UserId, 1, chOtherFriendsFollow)
+		//friend := allFriends[i]
+		pFans   := HisFriendList(cxt, session, uid, friend.UserId, 0, friendPage, chOtherFriendsFans)
+		if pFans != nil {
+			friendsOfOther = append(friendsOfOther, pFans.Friends.FriendsArray...)
+		}
+		pfollow := HisFriendList(cxt, session, uid, friend.UserId, 1, friendPage, chOtherFriendsFollow)
+		if pfollow != nil {
+			friendsOfOther = append(friendsOfOther, pfollow.Friends.FriendsArray...)
+		}
 	}
 
-	//Combine all friends of other user.
-	friendsOfOther := make([]Friend, 0)
-	for i := 0; i < len(allFriends); i++ {
-		f := <-chOtherFriendsFans
-		if f != nil {
-			friendsOfOther = append(friendsOfOther, f.Friends.FriendsArray...)
-		}
-		f = <-chOtherFriendsFollow
-		if f != nil {
-			friendsOfOther = append(friendsOfOther, f.Friends.FriendsArray...)
-		}
-	}
 
 	//Filter out people that have been added in my friends.
 	availables := make([]Friend, 0)
@@ -56,6 +53,7 @@ func GetNoRelationPeople(cxt appengine.Context, session string, access_token str
 			availables = append(availables, fo)
 		}
 	}
+
 
 	l := len(availables)
 	if l > 0 {

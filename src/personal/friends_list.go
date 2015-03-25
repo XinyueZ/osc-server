@@ -14,6 +14,30 @@ import (
 	"net/http"
 )
 
+func MyFriendList(cxt appengine.Context, session string, uid int, relation int, page int, ch chan *FriendsList) (pFriendList *FriendsList) {
+	total := 3
+	if total > 0 {
+		go FriendList(cxt, session, uid, page, relation, total, ch)
+		pFriendList = <-ch
+	} else {
+		pFriendList = nil
+	}
+	return
+}
+
+func HisFriendList(cxt appengine.Context, session string, uid int, friend int, relation int, page int, ch chan *FriendsList) (pFriendList *FriendsList) {
+	total := 3
+	if total > 0 {
+		go FriendList(cxt, session, friend, page, relation, total, ch)
+		pFriendList = <-ch
+	} else {
+		pFriendList = nil
+	}
+	return
+}
+
+
+
 func AllMyFriendList(cxt appengine.Context, session string, uid int, relation int, ch chan *FriendsList) (pFriendList *FriendsList) {
 	chMyInfo := make(chan *MyInfo)
 	go MyInformation(cxt, session, uid, chMyInfo)
@@ -39,6 +63,7 @@ func AllMyFriendList(cxt appengine.Context, session string, uid int, relation in
 	}
 	return
 }
+
 
 func AllHisFriendList(cxt appengine.Context, session string, uid int, friend int, relation int, ch chan *FriendsList) (pFriendList *FriendsList) {
 	chInfo := make(chan *UserInfo)

@@ -65,6 +65,8 @@ const (
 	FRI   = "fri"
 	REL   = "rel"
 	ME    = "me"
+	MP    = "mp"
+	FP    = "fp"
 
 	STATUS_OK  = 200
 	STATUS_ERR = 300

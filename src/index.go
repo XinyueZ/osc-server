@@ -699,14 +699,18 @@ func handleDelTweetFavorite(w http.ResponseWriter, r *http.Request) {
 //Get some no relation people.
 func handleNoRelationPeople(w http.ResponseWriter, r *http.Request) {
 	cxt := appengine.NewContext(r)
+	
 	args := r.URL.Query()
 	uid , _ := strconv.Atoi( args[common.UID][0]) //User id
+	mp , _ := strconv.Atoi( args[common.MP][0]) //My page of friends-list.
+	fp , _ := strconv.Atoi(args[common.FP][0] )//Friend's page of friends-list.
+
 
 	cookies := r.Cookies()           //Session in cookies passt
 	session := cookies[0].Value      //Get user-session
 	access_token := cookies[1].Value //Get user-token
 
-	s := personal.GetNoRelationPeople(cxt , session  , access_token  , uid  )
+	s := personal.GetNoRelationPeople(cxt , session  , access_token  , uid , mp, fp )
 	s  = fmt.Sprintf(`{"status":%d, "people" : %s }`, common.STATUS_OK, s )
 	w.Header().Set("Content-Type", common.API_RESTYPE)
 	fmt.Fprintf(w, s)
